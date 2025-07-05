@@ -1,0 +1,384 @@
+﻿using iTextSharp.text;
+using iTextSharp.text.pdf;
+using System;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using Application = System.Windows.Application;
+using MessageBox = System.Windows.MessageBox;
+using WordInterop = Microsoft.Office.Interop.Word;
+using PowerPointInterop = Microsoft.Office.Interop.PowerPoint;
+using ExcelInterop = Microsoft.Office.Interop.Excel;
+
+namespace AllAutoOfficePDF2
+{
+    // データモデル
+    public class FileItem : INotifyPropertyChanged
+    {
+        private bool _isSelected;
+        public bool IsSelected
+        {
+            get => _isSelected;
+            set
+            {
+                _isSelected = value;
+                OnPropertyChanged(nameof(IsSelected));
+            }
+        }
+
+        public int Number { get; set; }
+        public string FileName { get; set; } = "";
+        public string FilePath { get; set; } = "";
+        public string Extension { get; set; } = "";
+        public DateTime LastModified { get; set; }
+        public string PdfStatus { get; set; } = "";
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+        protected void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+
+    // メインウィンドウ
+    public partial class MainWindow : System.Windows.Window
+    {
+        private ObservableCollection<FileItem> fileItems = new ObservableCollection<FileItem>();
+        private string selectedFolderPath = "";
+        private string pdfOutputFolder = "";
+
+        public MainWindow()
+        {
+            InitializeComponent();
+            dgFiles.ItemsSource = fileItems;
+        }
+
+        // フォルダ選択
+        private void BtnSelectFolder_Click(object sender, RoutedEventArgs e)
+        {
+            using (var dialog = new System.Windows.Forms.FolderBrowserDialog())
+            {
+                dialog.Description = "対象フォルダを選択してください";
+                if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                {
+                    selectedFolderPath = dialog.SelectedPath;
+                    txtFolderPath.Text = selectedFolderPath;
+                    pdfOutputFolder = Path.Combine(selectedFolderPath, "PDF");
+                    txtStatus.Text = "フォルダが選択されました";
+                }
+            }
+        }
+
+        // ファイル読込
+        private void BtnReadFolder_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(selectedFolderPath))
+            {
+                System.Windows.MessageBox.Show("フォルダを選択してください", "エラー", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            fileItems.Clear();
+
+            var extensions = new[] { "*.xls", "*.xlsx", "*.xlsm", "*.doc", "*.docx", "*.ppt", "*.pptx", "*.pdf" };
+            int number = 1;
+
+            foreach (var ext in extensions)
+            {
+                var files = Directory.GetFiles(selectedFolderPath, ext);
+                foreach (var file in files.OrderBy(f => f))
+                {
+                    var fileInfo = new FileInfo(file);
+                    var item = new FileItem
+                    {
+                        Number = number++,
+                        FileName = fileInfo.Name,
+                        FilePath = fileInfo.FullName,
+                        Extension = fileInfo.Extension.TrimStart('.').ToUpper(),
+                        LastModified = fileInfo.LastWriteTime,
+                        IsSelected = true,
+                        PdfStatus = CheckPdfExists(fileInfo) ? "変換済" : "未変換"
+                    };
+                    fileItems.Add(item);
+                }
+            }
+
+            txtStatus.Text = $"{fileItems.Count}個のファイルを読み込みました";
+        }
+
+        // PDFの存在確認
+        private bool CheckPdfExists(FileInfo fileInfo)
+        {
+            if (fileInfo.Extension.ToLower() == ".pdf") return true;
+
+            var pdfPath = Path.Combine(pdfOutputFolder, Path.GetFileNameWithoutExtension(fileInfo.Name) + ".pdf");
+            return File.Exists(pdfPath);
+        }
+
+        // ファイル更新
+        private void BtnUpdateFiles_Click(object sender, RoutedEventArgs e)
+        {
+            BtnReadFolder_Click(sender, e);
+            txtStatus.Text = "ファイル一覧を更新しました";
+        }
+
+        // PDF変換
+        private async void BtnConvertPDF_Click(object sender, RoutedEventArgs e)
+        {
+            var selectedFiles = fileItems.Where(f => f.IsSelected && f.Extension != "PDF").ToList();
+            if (!selectedFiles.Any())
+            {
+                System.Windows.MessageBox.Show("変換するファイルを選択してください", "情報", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            // PDFフォルダ作成
+            if (!Directory.Exists(pdfOutputFolder))
+                Directory.CreateDirectory(pdfOutputFolder);
+
+            progressBar.Visibility = Visibility.Visible;
+            progressBar.Maximum = selectedFiles.Count;
+            progressBar.Value = 0;
+
+            await System.Threading.Tasks.Task.Run(() =>
+            {
+                foreach (var file in selectedFiles)
+                {
+                    try
+                    {
+                        ConvertToPdf(file.FilePath);
+
+                        Dispatcher.Invoke(() =>
+                        {
+                            file.PdfStatus = "変換済";
+                            file.IsSelected = false;
+                            progressBar.Value++;
+                            txtStatus.Text = $"変換中: {file.FileName}";
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        Dispatcher.Invoke(() =>
+                        {
+                            System.Windows.MessageBox.Show($"変換エラー: {file.FileName}\n{ex.Message}", "エラー",
+                                MessageBoxButton.OK, MessageBoxImage.Error);
+                        });
+                    }
+                }
+            });
+
+            progressBar.Visibility = Visibility.Collapsed;
+            txtStatus.Text = "PDF変換が完了しました";
+        }
+
+        // Office文書をPDFに変換
+        private void ConvertToPdf(string filePath)
+        {
+            var extension = Path.GetExtension(filePath).ToLower();
+            var outputPath = Path.Combine(pdfOutputFolder, Path.GetFileNameWithoutExtension(filePath) + ".pdf");
+
+            switch (extension)
+            {
+                case ".xls":
+                case ".xlsx":
+                case ".xlsm":
+                    ConvertExcelToPdf(filePath, outputPath);
+                    break;
+                case ".doc":
+                case ".docx":
+                    ConvertWordToPdf(filePath, outputPath);
+                    break;
+                case ".ppt":
+                case ".pptx":
+                    ConvertPowerPointToPdf(filePath, outputPath);
+                    break;
+            }
+        }
+
+        // Excel→PDF変換
+        private void ConvertExcelToPdf(string inputPath, string outputPath)
+        {
+            ExcelInterop.Application? excelApp = null;
+            ExcelInterop.Workbook? workbook = null;
+
+            try
+            {
+                excelApp = new ExcelInterop.Application();
+                excelApp.Visible = false;
+                workbook = excelApp.Workbooks.Open(inputPath);
+                workbook.ExportAsFixedFormat(ExcelInterop.XlFixedFormatType.xlTypePDF, outputPath);
+            }
+            finally
+            {
+                workbook?.Close(false);
+                excelApp?.Quit();
+                if (workbook != null) ReleaseComObject(workbook);
+                if (excelApp != null) ReleaseComObject(excelApp);
+            }
+        }
+
+        // Word→PDF変換
+        private void ConvertWordToPdf(string inputPath, string outputPath)
+        {
+            WordInterop.Application? wordApp = null;
+            WordInterop.Document? document = null;
+
+            try
+            {
+                wordApp = new WordInterop.Application();
+                wordApp.Visible = false;
+                document = wordApp.Documents.Open(inputPath);
+                document.ExportAsFixedFormat(outputPath, WordInterop.WdExportFormat.wdExportFormatPDF);
+            }
+            finally
+            {
+                document?.Close(false);
+                wordApp?.Quit();
+                if (document != null) ReleaseComObject(document);
+                if (wordApp != null) ReleaseComObject(wordApp);
+            }
+        }
+
+        // PowerPoint→PDF変換
+        private void ConvertPowerPointToPdf(string inputPath, string outputPath)
+        {
+            PowerPointInterop.Application? pptApp = null;
+            PowerPointInterop.Presentation? presentation = null;
+
+            try
+            {
+                pptApp = new PowerPointInterop.Application();
+                presentation = pptApp.Presentations.Open(inputPath);
+                presentation.SaveAs(outputPath, PowerPointInterop.PpSaveAsFileType.ppSaveAsPDF);
+            }
+            finally
+            {
+                presentation?.Close();
+                pptApp?.Quit();
+                if (presentation != null) ReleaseComObject(presentation);
+                if (pptApp != null) ReleaseComObject(pptApp);
+            }
+        }
+
+        // PDF結合
+        private async void BtnMergePDF_Click(object sender, RoutedEventArgs e)
+        {
+            var pdfFiles = Directory.GetFiles(pdfOutputFolder, "*.pdf").OrderBy(f => f).ToList();
+            if (!pdfFiles.Any())
+            {
+                System.Windows.MessageBox.Show("結合するPDFファイルがありません", "情報", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var mergeFolder = Path.Combine(selectedFolderPath, "mergePDF");
+            if (!Directory.Exists(mergeFolder))
+                Directory.CreateDirectory(mergeFolder);
+
+            var timestamp = DateTime.Now.ToString("yyMMddHHmmss");
+            var outputFileName = $"{txtMergeFileName.Text}_{timestamp}.pdf";
+            var outputPath = Path.Combine(mergeFolder, outputFileName);
+
+            progressBar.Visibility = Visibility.Visible;
+            progressBar.IsIndeterminate = true;
+            txtStatus.Text = "PDF結合中...";
+
+            await System.Threading.Tasks.Task.Run(() =>
+            {
+                try
+                {
+                    using (var document = new Document())
+                    using (var copy = new PdfCopy(document, new FileStream(outputPath, FileMode.Create)))
+                    {
+                        document.Open();
+
+                        foreach (var pdfPath in pdfFiles)
+                        {
+                            using (var reader = new PdfReader(pdfPath))
+                            {
+                                for (int i = 1; i <= reader.NumberOfPages; i++)
+                                {
+                                    var page = copy.GetImportedPage(reader, i);
+                                    copy.AddPage(page);
+                                }
+                            }
+                        }
+                    }
+
+                    // ページ番号追加（オプション）
+                    if (chkAddPageNumber.IsChecked == true)
+                    {
+                        AddPageNumbers(outputPath);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        System.Windows.MessageBox.Show($"PDF結合エラー: {ex.Message}", "エラー",
+                            MessageBoxButton.OK, MessageBoxImage.Error);
+                    });
+                }
+            });
+
+            progressBar.Visibility = Visibility.Collapsed;
+            txtStatus.Text = "PDF結合が完了しました";
+
+            // 結合フォルダを開く
+            System.Diagnostics.Process.Start("explorer.exe", mergeFolder);
+        }
+
+        // ページ番号追加
+        private void AddPageNumbers(string pdfPath)
+        {
+            var tempPath = pdfPath + ".tmp";
+
+            using (var reader = new PdfReader(pdfPath))
+            using (var stamper = new PdfStamper(reader, new FileStream(tempPath, FileMode.Create)))
+            {
+                var totalPages = reader.NumberOfPages;
+
+                for (int i = 1; i <= totalPages; i++)
+                {
+                    var cb = stamper.GetOverContent(i);
+                    var pageSize = reader.GetPageSize(i);
+
+                    cb.BeginText();
+                    cb.SetFontAndSize(BaseFont.CreateFont(BaseFont.HELVETICA, BaseFont.CP1252, false), 10);
+                    cb.ShowTextAligned(PdfContentByte.ALIGN_CENTER,
+                        $"{i} / {totalPages}",
+                        pageSize.Width / 2, 20, 0);
+                    cb.EndText();
+                }
+            }
+
+            File.Delete(pdfPath);
+            File.Move(tempPath, pdfPath);
+        }
+
+        // 全選択チェックボックス
+        private void ChkSelectAll_Click(object sender, RoutedEventArgs e)
+        {
+            var isChecked = chkSelectAll.IsChecked ?? false;
+            foreach (var item in fileItems)
+            {
+                item.IsSelected = isChecked;
+            }
+        }
+
+        // COMオブジェクト解放
+        private void ReleaseComObject(object? obj)
+        {
+            if (obj != null)
+            {
+                System.Runtime.InteropServices.Marshal.ReleaseComObject(obj);
+                obj = null;
+            }
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+        }
+    }
+}
