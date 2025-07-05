@@ -63,6 +63,10 @@
               "target": "Package",
               "version": "[15.0.4797.1004, )"
             },
+            "System.Text.Json": {
+              "target": "Package",
+              "version": "[9.0.6, )"
+            },
             "iTextSharp": {
               "target": "Package",
               "version": "[5.5.13.4, )"

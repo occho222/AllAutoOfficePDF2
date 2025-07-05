@@ -26,3 +26,9 @@ C:\github\AllAutoOfficePDF2\AllAutoOfficePDF2\obj\x64\Debug\net6.0-windows\refin
 C:\github\AllAutoOfficePDF2\AllAutoOfficePDF2\obj\x64\Debug\net6.0-windows\AllAutoOfficePDF2.pdb
 C:\github\AllAutoOfficePDF2\AllAutoOfficePDF2\obj\x64\Debug\net6.0-windows\AllAutoOfficePDF2.genruntimeconfig.cache
 C:\github\AllAutoOfficePDF2\AllAutoOfficePDF2\obj\x64\Debug\net6.0-windows\ref\AllAutoOfficePDF2.dll
+C:\github\AllAutoOfficePDF2\AllAutoOfficePDF2\bin\x64\Debug\net6.0-windows\Microsoft.Bcl.AsyncInterfaces.dll
+C:\github\AllAutoOfficePDF2\AllAutoOfficePDF2\bin\x64\Debug\net6.0-windows\System.IO.Pipelines.dll
+C:\github\AllAutoOfficePDF2\AllAutoOfficePDF2\bin\x64\Debug\net6.0-windows\System.Text.Encodings.Web.dll
+C:\github\AllAutoOfficePDF2\AllAutoOfficePDF2\bin\x64\Debug\net6.0-windows\System.Text.Json.dll
+C:\github\AllAutoOfficePDF2\AllAutoOfficePDF2\obj\x64\Debug\net6.0-windows\ProjectEditDialog.baml
+C:\github\AllAutoOfficePDF2\AllAutoOfficePDF2\obj\x64\Debug\net6.0-windows\ProjectEditDialog.g.cs
