@@ -54,8 +54,7 @@
               "RelativeToolTip": "ProjectEditDialog.xaml",
               "ViewState": "AgIAADgAAAAAAAAAAAA8wDkAAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-07-05T11:28:21.55Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-07-05T11:28:21.55Z"
             },
             {
               "$type": "Document",
@@ -102,7 +101,7 @@
               "RelativeDocumentMoniker": "MainWindow.xaml.cs",
               "ToolTip": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\MainWindow.xaml.cs",
               "RelativeToolTip": "MainWindow.xaml.cs",
-              "ViewState": "AgIAAEoFAAAAAAAAAAA8wDoAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAPoFAAAAAAAAAABVwMcFAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-07-05T08:45:32.252Z",
               "EditorCaption": ""
@@ -129,7 +128,8 @@
               "RelativeToolTip": "App.xaml.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAACUAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-05T08:47:34.888Z"
+              "WhenOpened": "2025-07-05T08:47:34.888Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",

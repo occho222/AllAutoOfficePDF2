@@ -52,7 +52,7 @@ namespace AllAutoOfficePDF2
         public string PdfOutputFolder { get; set; } = "";
         public string MergeFileName { get; set; } = "結合PDF";
         public bool AddPageNumber { get; set; } = false;
-        public bool AddHeaderFooter { get; set; } = false;
+        public string LatestMergedPdfPath { get; set; } = "";
         public DateTime CreatedDate { get; set; } = DateTime.Now;
         public DateTime LastAccessDate { get; set; } = DateTime.Now;
         public List<FileItemData> FileItems { get; set; } = new List<FileItemData>();
@@ -152,7 +152,17 @@ namespace AllAutoOfficePDF2
             }
         }
 
-        public int Number { get; set; }
+        private int _number;
+        public int Number
+        {
+            get => _number;
+            set
+            {
+                _number = value;
+                OnPropertyChanged(nameof(Number));
+            }
+        }
+
         public string FileName { get; set; } = "";
         public string FilePath { get; set; } = "";
         public string Extension { get; set; } = "";
@@ -190,6 +200,11 @@ namespace AllAutoOfficePDF2
             {
                 SwitchToProject(activeProject);
             }
+            else
+            {
+                // アクティブプロジェクトがない場合の初期表示
+                UpdateLatestMergedPdfDisplay();
+            }
 
             UpdateProjectDisplay();
         }
@@ -223,15 +238,6 @@ namespace AllAutoOfficePDF2
         private void FileName_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (sender is TextBlock textBlock && textBlock.DataContext is FileItem fileItem)
-            {
-                OpenFile(fileItem.FilePath);
-            }
-        }
-
-        // DataGridダブルクリック時の処理
-        private void DgFiles_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            if (dgFiles.SelectedItem is FileItem fileItem)
             {
                 OpenFile(fileItem.FilePath);
             }
@@ -311,13 +317,12 @@ namespace AllAutoOfficePDF2
             var sortedItems = fileItems.OrderBy(f => f.FileName).ToList();
             fileItems.Clear();
             
-            foreach (var item in sortedItems)
+            for (int i = 0; i < sortedItems.Count; i++)
             {
-                fileItems.Add(item);
+                sortedItems[i].Number = i + 1;
+                sortedItems[i].DisplayOrder = i;
+                fileItems.Add(sortedItems[i]);
             }
-            
-            // 番号を更新
-            UpdateFileNumbers();
             
             // 現在のプロジェクトの状態を保存
             SaveCurrentProjectState();
@@ -361,7 +366,6 @@ namespace AllAutoOfficePDF2
                 currentProject.PdfOutputFolder = pdfOutputFolder;
                 currentProject.MergeFileName = txtMergeFileName.Text;
                 currentProject.AddPageNumber = chkAddPageNumber.IsChecked ?? false;
-                currentProject.AddHeaderFooter = chkAddHeaderFooter.IsChecked ?? false;
                 currentProject.LastAccessDate = DateTime.Now;
 
                 // ファイルアイテムの状態を保存（表示順序も含む）
@@ -404,7 +408,9 @@ namespace AllAutoOfficePDF2
             txtFolderPath.Text = selectedFolderPath;
             txtMergeFileName.Text = project.MergeFileName;
             chkAddPageNumber.IsChecked = project.AddPageNumber;
-            chkAddHeaderFooter.IsChecked = project.AddHeaderFooter;
+
+            // 最新結合PDFの表示を更新
+            UpdateLatestMergedPdfDisplay();
 
             // ファイルアイテムを復元
             RestoreFileItems(project);
@@ -442,7 +448,7 @@ namespace AllAutoOfficePDF2
                     bool isSelected = savedItem?.IsSelected ?? true;
                     string targetPages = savedItem?.TargetPages ??
                         ((extensionUpper == "XLS" || extensionUpper == "XLSX" || extensionUpper == "XLSM") ? "1-1" : "");
-                    int displayOrder = savedItem?.DisplayOrder ?? 0;
+                    int displayOrder = savedItem?.DisplayOrder ?? -1; // -1を使用して未保存を示す
 
                     var item = new FileItem
                     {
@@ -462,12 +468,12 @@ namespace AllAutoOfficePDF2
 
             // 保存された順序で並び替え、または新しいファイルはファイル名順
             var orderedItems = tempFileItems
-                .Where(f => f.DisplayOrder > 0)
+                .Where(f => f.DisplayOrder >= 0) // 0以上の値を持つもの
                 .OrderBy(f => f.DisplayOrder)
                 .ToList();
 
             var newItems = tempFileItems
-                .Where(f => f.DisplayOrder == 0)
+                .Where(f => f.DisplayOrder < 0) // 負の値（未保存）のもの
                 .OrderBy(f => f.FileName)
                 .ToList();
 
@@ -496,6 +502,66 @@ namespace AllAutoOfficePDF2
             {
                 lblCurrentProject.Content = "現在のプロジェクト: なし";
                 Title = "AllAutoOfficePDF2";
+            }
+        }
+
+        // 最新結合PDFの表示を更新
+        private void UpdateLatestMergedPdfDisplay()
+        {
+            if (currentProject != null && !string.IsNullOrEmpty(currentProject.LatestMergedPdfPath))
+            {
+                if (File.Exists(currentProject.LatestMergedPdfPath))
+                {
+                    txtLatestMergedPDF.Text = Path.GetFileName(currentProject.LatestMergedPdfPath);
+                    btnOpenLatestMergedPDF.IsEnabled = true;
+                }
+                else
+                {
+                    txtLatestMergedPDF.Text = "ファイルが見つかりません";
+                    btnOpenLatestMergedPDF.IsEnabled = false;
+                }
+            }
+            else
+            {
+                txtLatestMergedPDF.Text = "まだ結合されていません";
+                btnOpenLatestMergedPDF.IsEnabled = false;
+            }
+        }
+
+        // 最新の結合PDFを開く
+        private void BtnOpenLatestMergedPDF_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentProject != null && !string.IsNullOrEmpty(currentProject.LatestMergedPdfPath))
+            {
+                if (File.Exists(currentProject.LatestMergedPdfPath))
+                {
+                    try
+                    {
+                        Process.Start(new ProcessStartInfo
+                        {
+                            FileName = currentProject.LatestMergedPdfPath,
+                            UseShellExecute = true
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"PDFを開けませんでした: {ex.Message}", "エラー",
+                            MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("結合PDFファイルが見つかりません。", "エラー",
+                        MessageBoxButton.OK, MessageBoxImage.Warning);
+                    
+                    // ファイルが存在しない場合は表示をリセット
+                    UpdateLatestMergedPdfDisplay();
+                }
+            }
+            else
+            {
+                MessageBox.Show("結合PDFファイルがありません。", "情報",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
@@ -620,8 +686,7 @@ namespace AllAutoOfficePDF2
                     FolderPath = dialog.FolderPath,
                     PdfOutputFolder = Path.Combine(dialog.FolderPath, "PDF"),
                     MergeFileName = txtMergeFileName.Text,
-                    AddPageNumber = chkAddPageNumber.IsChecked ?? false,
-                    AddHeaderFooter = chkAddHeaderFooter.IsChecked ?? false
+                    AddPageNumber = chkAddPageNumber.IsChecked ?? false
                 };
 
                 // 現在のファイル状態を保存
@@ -1074,7 +1139,7 @@ namespace AllAutoOfficePDF2
         {
             dynamic? pptApp = null;
             dynamic? presentation = null;
-            dynamic? tempPresentation = null;
+            string? tempPdfPath = null;
 
             try
             {
@@ -1082,12 +1147,10 @@ namespace AllAutoOfficePDF2
                 presentation = pptApp.Presentations.Open(inputPath);
 
                 var targetSlides = ParsePageRange(targetPages);
+                var totalSlides = presentation.Slides.Count;
 
                 if (targetSlides.Any())
                 {
-                    // 指定スライドのみ変換
-                    var totalSlides = presentation.Slides.Count;
-
                     // 存在しないスライドのチェック
                     var invalidSlides = targetSlides.Where(s => s > totalSlides).ToList();
                     if (invalidSlides.Any())
@@ -1095,41 +1158,51 @@ namespace AllAutoOfficePDF2
                         throw new ArgumentException($"存在しないスライド番号が指定されています: {string.Join(", ", invalidSlides)} (総スライド数: {totalSlides})");
                     }
 
-                    // 新しいプレゼンテーションを作成
-                    tempPresentation = pptApp.Presentations.Add();
+                    // 一時的に全スライドをPDFに変換
+                    tempPdfPath = Path.Combine(Path.GetTempPath(), $"temp_ppt_{Guid.NewGuid()}.pdf");
+                    presentation.SaveAs(tempPdfPath, 32); // 32 = ppSaveAsPDF
 
-                    // 指定スライドをコピー
-                    foreach (var slideIndex in targetSlides.OrderBy(x => x))
-                    {
-                        var sourceSlide = presentation.Slides[slideIndex];
-                        sourceSlide.Copy();
-                        tempPresentation.Slides.Paste();
-                    }
+                    // PowerPointを閉じる
+                    presentation.Close();
+                    pptApp.Quit();
+                    ReleaseComObject(presentation);
+                    ReleaseComObject(pptApp);
+                    presentation = null;
+                    pptApp = null;
 
-                    // 最初の空白スライドを削除（存在する場合）
-                    if (tempPresentation.Slides.Count > targetSlides.Count)
-                    {
-                        tempPresentation.Slides[1].Delete();
-                    }
+                    // 一時的なGC実行
+                    GC.Collect();
+                    GC.WaitForPendingFinalizers();
 
-                    // 一時プレゼンテーションをPDF保存
-                    tempPresentation.SaveAs(outputPath, 32); // 32 = ppSaveAsPDF
+                    // 指定されたページのみを抽出してPDFを作成
+                    ExtractPdfPages(tempPdfPath, outputPath, targetSlides);
                 }
                 else
                 {
-                    // 全スライド変換
+                    // 全スライド変換（元のプレゼンテーションをそのまま使用）
                     presentation.SaveAs(outputPath, 32); // 32 = ppSaveAsPDF
                 }
 
-                presentation.Close();
-                tempPresentation?.Close();
+                presentation?.Close();
             }
             finally
             {
                 try { pptApp?.Quit(); } catch { }
-                if (tempPresentation != null) ReleaseComObject(tempPresentation);
                 if (presentation != null) ReleaseComObject(presentation);
                 if (pptApp != null) ReleaseComObject(pptApp);
+
+                // 一時ファイルを削除
+                if (!string.IsNullOrEmpty(tempPdfPath) && File.Exists(tempPdfPath))
+                {
+                    try
+                    {
+                        File.Delete(tempPdfPath);
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"一時ファイル削除に失敗: {ex.Message}");
+                    }
+                }
 
                 // 念のためGCを2回
                 GC.Collect();
@@ -1145,24 +1218,45 @@ namespace AllAutoOfficePDF2
             }
         }
 
+        // PDFから指定されたページのみを抽出
+        private void ExtractPdfPages(string inputPdfPath, string outputPdfPath, List<int> pageNumbers)
+        {
+            using (var inputReader = new PdfReader(inputPdfPath))
+            using (var outputDocument = new Document())
+            using (var outputWriter = new PdfCopy(outputDocument, new FileStream(outputPdfPath, FileMode.Create)))
+            {
+                outputDocument.Open();
+
+                foreach (var pageNumber in pageNumbers.OrderBy(p => p))
+                {
+                    if (pageNumber <= inputReader.NumberOfPages)
+                    {
+                        var page = outputWriter.GetImportedPage(inputReader, pageNumber);
+                        outputWriter.AddPage(page);
+                    }
+                }
+            }
+        }
+
         // PDF結合
         private async void BtnMergePDF_Click(object sender, RoutedEventArgs e)
         {
-            // GUI上の順序でPDFファイルを結合
-            var selectedFiles = fileItems
-                .Where(f => f.IsSelected)
+            // 全ファイルを表示順序で取得（選択状態に関係なく）
+            var allFiles = fileItems
                 .OrderBy(f => f.DisplayOrder) // 表示順序で並び替え
                 .ToList();
 
-            if (!selectedFiles.Any())
+            if (!allFiles.Any())
             {
-                System.Windows.MessageBox.Show("結合するファイルを選択してください", "情報", MessageBoxButton.OK, MessageBoxImage.Information);
+                System.Windows.MessageBox.Show("結合対象のファイルがありません", "情報", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
-            // 選択されたファイルのPDFファイルパスを取得
+            // 全ファイルに対応するPDFファイルの存在確認
             var pdfFilePaths = new List<string>();
-            foreach (var file in selectedFiles)
+            var missingPdfFiles = new List<string>();
+
+            foreach (var file in allFiles)
             {
                 string pdfPath;
                 if (file.Extension.ToLower() == "pdf")
@@ -1180,10 +1274,19 @@ namespace AllAutoOfficePDF2
                 }
                 else
                 {
-                    MessageBox.Show($"PDFファイルが見つかりません: {Path.GetFileName(pdfPath)}\n先にPDF変換を実行してください。", 
-                        "エラー", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
+                    missingPdfFiles.Add(file.FileName);
                 }
+            }
+
+            // 見つからないPDFファイルがある場合はエラーメッセージを表示して中止
+            if (missingPdfFiles.Any())
+            {
+                var message = "以下のファイルに対応するPDFファイルが見つかりません:\n\n";
+                message += string.Join("\n", missingPdfFiles);
+                message += "\n\n先にPDF変換を実行してください。";
+                
+                MessageBox.Show(message, "PDFファイル不足", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
             }
 
             var mergeFolder = Path.Combine(selectedFolderPath, "mergePDF");
@@ -1202,6 +1305,8 @@ namespace AllAutoOfficePDF2
             progressBar.IsIndeterminate = true;
             txtStatus.Text = "PDF結合中...";
 
+            bool mergeSuccess = false;
+            
             await System.Threading.Tasks.Task.Run(() =>
             {
                 try
@@ -1229,6 +1334,8 @@ namespace AllAutoOfficePDF2
                     {
                         AddPageNumbers(outputPath);
                     }
+                    
+                    mergeSuccess = true;
                 }
                 catch (Exception ex)
                 {
@@ -1241,10 +1348,55 @@ namespace AllAutoOfficePDF2
             });
 
             progressBar.Visibility = Visibility.Collapsed;
-            txtStatus.Text = "PDF結合が完了しました";
+            
+            if (mergeSuccess)
+            {
+                // 最新の結合PDFパスを保存
+                if (currentProject != null)
+                {
+                    currentProject.LatestMergedPdfPath = outputPath;
+                    SaveProjects();
+                }
 
-            // 結合フォルダを開く
-            System.Diagnostics.Process.Start("explorer.exe", mergeFolder);
+                // 最新結合PDFの表示を更新
+                UpdateLatestMergedPdfDisplay();
+
+                txtStatus.Text = "PDF結合が完了しました";
+                
+                // PDFを開くかの確認ダイアログを表示
+                var result = MessageBox.Show("PDFを開きますか？", "PDF結合完了", 
+                    MessageBoxButton.YesNo, MessageBoxImage.Question);
+                
+                if (result == MessageBoxResult.Yes)
+                {
+                    try
+                    {
+                        Process.Start(new ProcessStartInfo
+                        {
+                            FileName = outputPath,
+                            UseShellExecute = true
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"PDFを開けませんでした: {ex.Message}", "エラー",
+                            MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+                else
+                {
+                    // 結合フォルダを開く
+                    try
+                    {
+                        Process.Start("explorer.exe", mergeFolder);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"フォルダを開けませんでした: {ex.Message}", "エラー",
+                            MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
         }
 
         // ページ番号追加
@@ -1264,9 +1416,10 @@ namespace AllAutoOfficePDF2
 
                     cb.BeginText();
                     cb.SetFontAndSize(BaseFont.CreateFont(BaseFont.HELVETICA, BaseFont.CP1252, false), 10);
-                    cb.ShowTextAligned(PdfContentByte.ALIGN_CENTER,
+                    // ページ番号を右上に配置（x座標：右端から20pt、y座標：上端から20pt）
+                    cb.ShowTextAligned(PdfContentByte.ALIGN_RIGHT,
                         $"{i} / {totalPages}",
-                        pageSize.Width / 2, 20, 0);
+                        pageSize.Width - 20, pageSize.Height - 20, 0);
                     cb.EndText();
                 }
             }
@@ -1339,6 +1492,33 @@ namespace AllAutoOfficePDF2
             
             // 現在のプロジェクトの状態を保存
             SaveCurrentProjectState();
+        }
+
+        // 現在のプロジェクトフォルダを開く（メイン画面用）
+        private void BtnOpenCurrentProjectFolder_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentProject != null && Directory.Exists(currentProject.FolderPath))
+            {
+                try
+                {
+                    Process.Start("explorer.exe", currentProject.FolderPath);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"フォルダを開けませんでした: {ex.Message}", "エラー",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            else if (currentProject == null)
+            {
+                MessageBox.Show("現在のプロジェクトが選択されていません。", "エラー",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+            else
+            {
+                MessageBox.Show("フォルダが見つかりません。", "エラー",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
 
         // COMオブジェクト解放

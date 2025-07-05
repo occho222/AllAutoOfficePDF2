@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window x:Class="AllAutoOfficePDF2.ProjectEditDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Project Edit" Height="220" Width="500"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Loaded="Window_Loaded">
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="15"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="15"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="15"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Project Name -->
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Label Content="Project Name:" Grid.Column="0" VerticalAlignment="Center"/>
+            <TextBox x:Name="txtProjectName" Grid.Column="1" Margin="10,0,0,0" 
+                     VerticalAlignment="Center" Height="25"/>
+        </Grid>
+
+        <!-- Folder Path -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Label Content="Folder Path:" Grid.Column="0" VerticalAlignment="Center"/>
+            <TextBox x:Name="txtFolderPath" Grid.Column="1" Margin="10,0,10,0" 
+                     VerticalAlignment="Center" Height="25" IsReadOnly="True"/>
+            <Button Content="Browse" Grid.Column="2" Width="60" Height="25"
+                    Click="BtnSelectFolder_Click"/>
+        </Grid>
+
+        <!-- Description -->
+        <TextBlock Grid.Row="4" Text="Office files and PDF files in the project folder will be processed." 
+                   TextWrapping="Wrap" FontSize="11" Foreground="Gray" 
+                   VerticalAlignment="Top"/>
+
+        <!-- Buttons -->
+        <StackPanel Grid.Row="6" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button x:Name="btnOK" Content="OK" Width="80" Height="30" Margin="0,0,10,0"
+                    Click="BtnOK_Click" IsDefault="True"/>
+            <Button x:Name="btnCancel" Content="Cancel" Width="80" Height="30"
+                    Click="BtnCancel_Click" IsCancel="True"/>
+        </StackPanel>
+    </Grid>
+</Window>

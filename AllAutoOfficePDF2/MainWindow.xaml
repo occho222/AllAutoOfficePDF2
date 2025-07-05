@@ -39,7 +39,6 @@
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
                             
                             <TextBlock Grid.Row="0" Text="{Binding Name}" FontWeight="Bold" FontSize="13"/>
@@ -47,9 +46,6 @@
                                        TextTrimming="CharacterEllipsis"/>
                             <TextBlock Grid.Row="2" Text="{Binding LastAccessDate, StringFormat='最終アクセス: {0:yyyy/MM/dd HH:mm}'}" 
                                        FontSize="9" Foreground="Gray"/>
-                            <Button Grid.Row="3" Content="📂 フォルダを開く" HorizontalAlignment="Left" 
-                                    Width="120" Height="25" Margin="0,5,0,0" FontSize="10"
-                                    Click="BtnOpenProjectFolder_Click" Tag="{Binding}"/>
                         </Grid>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
@@ -115,13 +111,17 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
                     <Label Content="対象フォルダ:" Grid.Column="0"/>
                     <TextBox x:Name="txtFolderPath" Grid.Column="1" Margin="5,0" IsReadOnly="True"/>
                     <Button x:Name="btnSelectFolder" Content="フォルダ選択" Grid.Column="2" 
                             Width="100" Margin="5,0" Click="BtnSelectFolder_Click"/>
-                    <Button x:Name="btnConvertToProject" Content="プロジェクト化" Grid.Column="3" 
+                    <Button x:Name="btnOpenCurrentProjectFolder" Content="📂 フォルダを開く" Grid.Column="3" 
+                            Width="120" Margin="5,0" Click="BtnOpenCurrentProjectFolder_Click"
+                            Background="#6C757D" Foreground="White"/>
+                    <Button x:Name="btnConvertToProject" Content="プロジェクト化" Grid.Column="4" 
                             Width="100" Margin="5,0" Click="BtnConvertToProject_Click"
                             Background="#17A2B8" Foreground="White" FontWeight="Bold"/>
                 </Grid>
@@ -154,8 +154,7 @@
 
             <!-- ファイル一覧 -->
             <DataGrid x:Name="dgFiles" Grid.Row="2" Margin="10" AutoGenerateColumns="False" 
-                      CanUserAddRows="False" CanUserDeleteRows="False" 
-                      MouseDoubleClick="DgFiles_MouseDoubleClick">
+                      CanUserAddRows="False" CanUserDeleteRows="False">
                 <DataGrid.Columns>
                     <DataGridCheckBoxColumn Header="選択" Binding="{Binding IsSelected}" Width="50"/>
                     <DataGridTextColumn Header="No" Binding="{Binding Number}" Width="50" IsReadOnly="True"/>
@@ -171,7 +170,28 @@
                         </DataGridHyperlinkColumn.ElementStyle>
                     </DataGridHyperlinkColumn>
                     <DataGridTextColumn Header="拡張子" Binding="{Binding Extension}" Width="80" IsReadOnly="True"/>
-                    <DataGridTextColumn Header="対象ページ" Binding="{Binding TargetPages}" Width="100" IsReadOnly="False"/>
+                    <DataGridTextColumn Header="対象ページ" Binding="{Binding TargetPages}" Width="100" IsReadOnly="False">
+                        <DataGridTextColumn.HeaderStyle>
+                            <Style TargetType="DataGridColumnHeader">
+                                <Setter Property="ToolTip">
+                                    <Setter.Value>
+                                        <ToolTip>
+                                            <StackPanel>
+                                                <TextBlock Text="ページ指定ルール:" FontWeight="Bold" Margin="0,0,0,5"/>
+                                                <TextBlock Text="• 単一ページ: 1" Margin="0,2"/>
+                                                <TextBlock Text="• 複数ページ: 1,3,5" Margin="0,2"/>
+                                                <TextBlock Text="• 範囲指定: 1-5" Margin="0,2"/>
+                                                <TextBlock Text="• 組み合わせ: 1,3-5,7" Margin="0,2"/>
+                                                <TextBlock Text="• Excel: シート番号を指定" Margin="0,2"/>
+                                                <TextBlock Text="• Word/PowerPoint: ページ/スライド番号を指定" Margin="0,2"/>
+                                                <TextBlock Text="• 空白: 全体を変換" Margin="0,2"/>
+                                            </StackPanel>
+                                        </ToolTip>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </DataGridTextColumn.HeaderStyle>
+                    </DataGridTextColumn>
                     <DataGridTextColumn Header="更新日時" Binding="{Binding LastModified, StringFormat=yyyy/MM/dd HH:mm:ss}" 
                                         Width="130" IsReadOnly="True"/>
                     <DataGridTextColumn Header="PDFステータス" Binding="{Binding PdfStatus}" Width="100" IsReadOnly="True"/>
@@ -181,19 +201,41 @@
             <!-- PDF結合設定 -->
             <GroupBox Grid.Row="3" Header="PDF結合設定" Margin="10,5">
                 <Grid Margin="5">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    
+                    <!-- 結合設定行 -->
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
 
-                    <Label Content="結合ファイル名:" Grid.Column="0"/>
-                    <TextBox x:Name="txtMergeFileName" Grid.Column="1" Margin="5,0" Text="結合PDF"/>
-                    <CheckBox x:Name="chkAddPageNumber" Content="ページ番号追加" Grid.Column="2" 
-                              Margin="10,0" VerticalAlignment="Center"/>
-                    <CheckBox x:Name="chkAddHeaderFooter" Content="ヘッダー/フッター追加" Grid.Column="3" 
-                              Margin="10,0" VerticalAlignment="Center"/>
+                        <Label Content="結合ファイル名:" Grid.Column="0"/>
+                        <TextBox x:Name="txtMergeFileName" Grid.Column="1" Margin="5,0" Text="結合PDF"/>
+                        <CheckBox x:Name="chkAddPageNumber" Content="ページ番号追加" Grid.Column="2" 
+                                  Margin="10,0" VerticalAlignment="Center"/>
+                    </Grid>
+                    
+                    <!-- 結合PDFファイル操作行 -->
+                    <Grid Grid.Row="1" Margin="0,5,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Label Content="最新結合PDF:" Grid.Column="0"/>
+                        <TextBox x:Name="txtLatestMergedPDF" Grid.Column="1" Margin="5,0" 
+                                 IsReadOnly="True" Background="#F8F9FA" 
+                                 Text="まだ結合されていません"/>
+                        <Button x:Name="btnOpenLatestMergedPDF" Content="📄 最新PDFを開く" Grid.Column="2" 
+                                Width="120" Margin="5,0" Click="BtnOpenLatestMergedPDF_Click"
+                                Background="#FFC107" Foreground="Black" FontWeight="Bold"/>
+                    </Grid>
                 </Grid>
             </GroupBox>
 
