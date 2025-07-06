@@ -9,9 +9,7 @@ C:\github\AllAutoOfficePDF2\AllAutoOfficePDF2\bin\x64\Debug\net6.0-windows\Micro
 C:\github\AllAutoOfficePDF2\AllAutoOfficePDF2\bin\x64\Debug\net6.0-windows\Microsoft.Office.Interop.PowerPoint.dll
 C:\github\AllAutoOfficePDF2\AllAutoOfficePDF2\bin\x64\Debug\net6.0-windows\Microsoft.Office.Interop.Word.dll
 C:\github\AllAutoOfficePDF2\AllAutoOfficePDF2\obj\x64\Debug\net6.0-windows\AllAutoOfficePDF2.csproj.AssemblyReference.cache
-C:\github\AllAutoOfficePDF2\AllAutoOfficePDF2\obj\x64\Debug\net6.0-windows\MainWindow.baml
 C:\github\AllAutoOfficePDF2\AllAutoOfficePDF2\obj\x64\Debug\net6.0-windows\App.baml
-C:\github\AllAutoOfficePDF2\AllAutoOfficePDF2\obj\x64\Debug\net6.0-windows\MainWindow.g.cs
 C:\github\AllAutoOfficePDF2\AllAutoOfficePDF2\obj\x64\Debug\net6.0-windows\App.g.cs
 C:\github\AllAutoOfficePDF2\AllAutoOfficePDF2\obj\x64\Debug\net6.0-windows\AllAutoOfficePDF2_MarkupCompile.cache
 C:\github\AllAutoOfficePDF2\AllAutoOfficePDF2\obj\x64\Debug\net6.0-windows\AllAutoOfficePDF2.g.resources
@@ -30,5 +28,7 @@ C:\github\AllAutoOfficePDF2\AllAutoOfficePDF2\bin\x64\Debug\net6.0-windows\Micro
 C:\github\AllAutoOfficePDF2\AllAutoOfficePDF2\bin\x64\Debug\net6.0-windows\System.IO.Pipelines.dll
 C:\github\AllAutoOfficePDF2\AllAutoOfficePDF2\bin\x64\Debug\net6.0-windows\System.Text.Encodings.Web.dll
 C:\github\AllAutoOfficePDF2\AllAutoOfficePDF2\bin\x64\Debug\net6.0-windows\System.Text.Json.dll
-C:\github\AllAutoOfficePDF2\AllAutoOfficePDF2\obj\x64\Debug\net6.0-windows\ProjectEditDialog.baml
-C:\github\AllAutoOfficePDF2\AllAutoOfficePDF2\obj\x64\Debug\net6.0-windows\ProjectEditDialog.g.cs
+C:\github\AllAutoOfficePDF2\AllAutoOfficePDF2\obj\x64\Debug\net6.0-windows\Views\MainWindow.baml
+C:\github\AllAutoOfficePDF2\AllAutoOfficePDF2\obj\x64\Debug\net6.0-windows\Views\ProjectEditDialog.baml
+C:\github\AllAutoOfficePDF2\AllAutoOfficePDF2\obj\x64\Debug\net6.0-windows\Views\MainWindow.g.cs
+C:\github\AllAutoOfficePDF2\AllAutoOfficePDF2\obj\x64\Debug\net6.0-windows\Views\ProjectEditDialog.g.cs

@@ -1,0 +1,191 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using AllAutoOfficePDF2.Models;
+
+namespace AllAutoOfficePDF2.Services
+{
+    /// <summary>
+    /// ファイル管理サービス
+    /// </summary>
+    public class FileManagementService
+    {
+        /// <summary>
+        /// 指定フォルダからファイルを読み込み
+        /// </summary>
+        /// <param name="folderPath">フォルダパス</param>
+        /// <param name="pdfOutputFolder">PDF出力フォルダ</param>
+        /// <returns>ファイルアイテムリスト</returns>
+        public static List<FileItem> LoadFilesFromFolder(string folderPath, string pdfOutputFolder)
+        {
+            var fileItems = new List<FileItem>();
+            var extensions = new[] { "*.xls", "*.xlsx", "*.xlsm", "*.doc", "*.docx", "*.ppt", "*.pptx", "*.pdf" };
+
+            foreach (var ext in extensions)
+            {
+                var files = Directory.GetFiles(folderPath, ext);
+                foreach (var file in files)
+                {
+                    var fileInfo = new FileInfo(file);
+                    string extensionUpper = fileInfo.Extension.TrimStart('.').ToUpper();
+                    
+                    var item = new FileItem
+                    {
+                        FileName = fileInfo.Name,
+                        FilePath = fileInfo.FullName,
+                        Extension = extensionUpper,
+                        LastModified = fileInfo.LastWriteTime,
+                        IsSelected = true,
+                        PdfStatus = CheckPdfExists(fileInfo, pdfOutputFolder) ? "変換済" : "未変換",
+                        TargetPages = GetDefaultTargetPages(extensionUpper)
+                    };
+                    fileItems.Add(item);
+                }
+            }
+
+            return fileItems.OrderBy(f => f.FileName).ToList();
+        }
+
+        /// <summary>
+        /// ファイルの更新をチェック
+        /// </summary>
+        /// <param name="folderPath">フォルダパス</param>
+        /// <param name="pdfOutputFolder">PDF出力フォルダ</param>
+        /// <param name="currentFileItems">現在のファイルアイテムリスト</param>
+        /// <returns>更新されたファイルアイテムリスト</returns>
+        public static (List<FileItem> UpdatedItems, List<string> ChangedFiles, List<string> AddedFiles, List<string> DeletedFiles) 
+            UpdateFiles(string folderPath, string pdfOutputFolder, List<FileItem> currentFileItems)
+        {
+            var previousFiles = currentFileItems.ToDictionary(f => f.FilePath, f => f);
+            var newFileItems = new List<FileItem>();
+            var changedFiles = new List<string>();
+            var addedFiles = new List<string>();
+            var extensions = new[] { "*.xls", "*.xlsx", "*.xlsm", "*.doc", "*.docx", "*.ppt", "*.pptx", "*.pdf" };
+
+            foreach (var ext in extensions)
+            {
+                var files = Directory.GetFiles(folderPath, ext);
+                foreach (var file in files)
+                {
+                    var fileInfo = new FileInfo(file);
+                    string extensionUpper = fileInfo.Extension.TrimStart('.').ToUpper();
+
+                    bool isSelected = true;
+                    string targetPages = GetDefaultTargetPages(extensionUpper);
+                    int displayOrder = 0;
+
+                    // 既存ファイルの場合は更新日時をチェック
+                    if (previousFiles.TryGetValue(file, out var existingFile))
+                    {
+                        if (existingFile.LastModified != fileInfo.LastWriteTime)
+                        {
+                            // 更新日時が変更された場合
+                            changedFiles.Add(fileInfo.Name);
+                            isSelected = true;
+                        }
+                        else
+                        {
+                            // 変更されていない場合は前の選択状態を保持
+                            isSelected = existingFile.IsSelected;
+                            targetPages = existingFile.TargetPages;
+                            displayOrder = existingFile.DisplayOrder;
+                        }
+                    }
+                    else
+                    {
+                        // 新規ファイルの場合
+                        addedFiles.Add(fileInfo.Name);
+                        isSelected = true;
+                        displayOrder = previousFiles.Count + addedFiles.Count - 1;
+                    }
+
+                    var item = new FileItem
+                    {
+                        FileName = fileInfo.Name,
+                        FilePath = fileInfo.FullName,
+                        Extension = extensionUpper,
+                        LastModified = fileInfo.LastWriteTime,
+                        IsSelected = isSelected,
+                        PdfStatus = CheckPdfExists(fileInfo, pdfOutputFolder) ? "変換済" : "未変換",
+                        TargetPages = targetPages,
+                        DisplayOrder = displayOrder
+                    };
+                    newFileItems.Add(item);
+                }
+            }
+
+            // 削除されたファイルを検出
+            var deletedFiles = new List<string>();
+            var currentFilePaths = newFileItems.Select(f => f.FilePath).ToHashSet();
+
+            foreach (var previousFile in previousFiles.Values)
+            {
+                if (!currentFilePaths.Contains(previousFile.FilePath))
+                {
+                    deletedFiles.Add(previousFile.FileName);
+
+                    // 対応するPDFファイルを削除
+                    if (previousFile.Extension.ToLower() != "pdf")
+                    {
+                        var pdfPath = Path.Combine(pdfOutputFolder, 
+                            Path.GetFileNameWithoutExtension(previousFile.FileName) + ".pdf");
+                        if (File.Exists(pdfPath))
+                        {
+                            try
+                            {
+                                File.Delete(pdfPath);
+                            }
+                            catch (Exception ex)
+                            {
+                                // ログに記録するか、エラーを蓄積
+                                System.Diagnostics.Debug.WriteLine($"PDFファイル削除エラー: {ex.Message}");
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 表示順序で並び替え
+            var orderedItems = newFileItems.OrderBy(f => f.DisplayOrder).ThenBy(f => f.FileName).ToList();
+            
+            // 番号を再設定
+            for (int i = 0; i < orderedItems.Count; i++)
+            {
+                orderedItems[i].Number = i + 1;
+                orderedItems[i].DisplayOrder = i;
+            }
+
+            return (orderedItems, changedFiles, addedFiles, deletedFiles);
+        }
+
+        /// <summary>
+        /// PDFファイルの存在を確認
+        /// </summary>
+        /// <param name="fileInfo">ファイル情報</param>
+        /// <param name="pdfOutputFolder">PDF出力フォルダ</param>
+        /// <returns>PDFファイルが存在するかどうか</returns>
+        private static bool CheckPdfExists(FileInfo fileInfo, string pdfOutputFolder)
+        {
+            if (fileInfo.Extension.ToLower() == ".pdf") return true;
+
+            var pdfPath = Path.Combine(pdfOutputFolder, 
+                Path.GetFileNameWithoutExtension(fileInfo.Name) + ".pdf");
+            return File.Exists(pdfPath);
+        }
+
+        /// <summary>
+        /// 拡張子に基づいてデフォルトの対象ページを取得
+        /// </summary>
+        /// <param name="extension">拡張子</param>
+        /// <returns>デフォルトの対象ページ</returns>
+        private static string GetDefaultTargetPages(string extension)
+        {
+            return extension switch
+            {
+                "XLS" or "XLSX" or "XLSM" => "1-1",
+                _ => ""
+            };
+        }
+    }
+}

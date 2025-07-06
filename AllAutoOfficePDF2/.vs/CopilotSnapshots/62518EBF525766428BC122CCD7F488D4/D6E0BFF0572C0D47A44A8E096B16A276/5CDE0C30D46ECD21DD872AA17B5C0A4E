@@ -1,0 +1,190 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Windows;
+using System.Windows.Forms;
+using MessageBox = System.Windows.MessageBox;
+
+namespace AllAutoOfficePDF2
+{
+    public partial class ProjectEditDialog : System.Windows.Window
+    {
+        public string ProjectName { get; set; } = "";
+        public string FolderPath { get; set; } = "";
+        public string ParentProjectId { get; set; } = "";
+        public bool IncludeSubfolders { get; set; } = false;
+        public string CustomPdfOutputFolder { get; set; } = "";
+        public List<ProjectData> AllProjects { get; set; } = new List<ProjectData>();
+        public string CurrentProjectId { get; set; } = ""; // 編集時に自分自身を除外するため
+
+        public ProjectEditDialog()
+        {
+            InitializeComponent();
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            txtProjectName.Text = ProjectName;
+            txtFolderPath.Text = FolderPath;
+            chkIncludeSubfolders.IsChecked = IncludeSubfolders;
+            txtCustomPdfOutputFolder.Text = CustomPdfOutputFolder;
+
+            // 親プロジェクト選択用のコンボボックスを設定
+            var parentProjects = AllProjects.Where(p => p.Id != CurrentProjectId).ToList();
+            var noneItem = new ProjectData { Id = "", Name = "なし（親プロジェクト）" };
+            parentProjects.Insert(0, noneItem);
+            
+            cmbParentProject.ItemsSource = parentProjects;
+            cmbParentProject.SelectedValue = ParentProjectId;
+
+            UpdatePreview();
+        }
+
+        private void BtnSelectFolder_Click(object sender, RoutedEventArgs e)
+        {
+            using (var dialog = new FolderBrowserDialog())
+            {
+                dialog.Description = "プロジェクトフォルダを選択してください";
+                if (!string.IsNullOrEmpty(txtFolderPath.Text))
+                {
+                    dialog.SelectedPath = txtFolderPath.Text;
+                }
+
+                if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                {
+                    txtFolderPath.Text = dialog.SelectedPath;
+                    
+                    // プロジェクト名が空の場合はフォルダ名を設定
+                    if (string.IsNullOrEmpty(txtProjectName.Text))
+                    {
+                        txtProjectName.Text = Path.GetFileName(dialog.SelectedPath);
+                    }
+
+                    UpdatePreview();
+                }
+            }
+        }
+
+        private void BtnSelectCustomPdfFolder_Click(object sender, RoutedEventArgs e)
+        {
+            using (var dialog = new FolderBrowserDialog())
+            {
+                dialog.Description = "PDF保存先フォルダを選択してください";
+                if (!string.IsNullOrEmpty(txtCustomPdfOutputFolder.Text))
+                {
+                    dialog.SelectedPath = txtCustomPdfOutputFolder.Text;
+                }
+
+                if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                {
+                    txtCustomPdfOutputFolder.Text = dialog.SelectedPath;
+                    UpdatePreview();
+                }
+            }
+        }
+
+        private void UpdatePreview()
+        {
+            var preview = "";
+            
+            if (!string.IsNullOrEmpty(txtProjectName.Text))
+            {
+                preview += $"プロジェクト名: {txtProjectName.Text}\n";
+            }
+
+            if (!string.IsNullOrEmpty(txtFolderPath.Text))
+            {
+                preview += $"対象フォルダ: {txtFolderPath.Text}\n";
+            }
+
+            if (cmbParentProject.SelectedItem is ProjectData parentProject && !string.IsNullOrEmpty(parentProject.Id))
+            {
+                preview += $"親プロジェクト: {parentProject.Name}\n";
+            }
+
+            if (chkIncludeSubfolders.IsChecked == true)
+            {
+                preview += "サブフォルダを含む\n";
+                
+                if (!string.IsNullOrEmpty(txtCustomPdfOutputFolder.Text))
+                {
+                    preview += $"PDF保存先: {txtCustomPdfOutputFolder.Text}\n";
+                }
+                else
+                {
+                    preview += "PDF保存先: 通常のPDFフォルダ\n";
+                }
+            }
+
+            txtPreview.Text = preview;
+        }
+
+        private void BtnOK_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(txtProjectName.Text))
+            {
+                MessageBox.Show("プロジェクト名を入力してください。", "エラー", 
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(txtFolderPath.Text))
+            {
+                MessageBox.Show("フォルダを選択してください。", "エラー", 
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (!Directory.Exists(txtFolderPath.Text))
+            {
+                MessageBox.Show("選択されたフォルダが存在しません。", "エラー", 
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // サブフォルダを含む場合はカスタムPDF保存パスも検証
+            if (chkIncludeSubfolders.IsChecked == true && !string.IsNullOrEmpty(txtCustomPdfOutputFolder.Text))
+            {
+                if (!Directory.Exists(txtCustomPdfOutputFolder.Text))
+                {
+                    var result = MessageBox.Show($"PDF保存先フォルダ '{txtCustomPdfOutputFolder.Text}' が存在しません。\n作成しますか？", 
+                        "確認", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                    
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        try
+                        {
+                            Directory.CreateDirectory(txtCustomPdfOutputFolder.Text);
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show($"フォルダの作成に失敗しました: {ex.Message}", "エラー", 
+                                MessageBoxButton.OK, MessageBoxImage.Error);
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
+            }
+
+            ProjectName = txtProjectName.Text.Trim();
+            FolderPath = txtFolderPath.Text.Trim();
+            ParentProjectId = cmbParentProject.SelectedValue?.ToString() ?? "";
+            IncludeSubfolders = chkIncludeSubfolders.IsChecked ?? false;
+            CustomPdfOutputFolder = txtCustomPdfOutputFolder.Text.Trim();
+            
+            DialogResult = true;
+            Close();
+        }
+
+        private void BtnCancel_Click(object sender, RoutedEventArgs e)
+        {
+            DialogResult = false;
+            Close();
+        }
+    }
+}

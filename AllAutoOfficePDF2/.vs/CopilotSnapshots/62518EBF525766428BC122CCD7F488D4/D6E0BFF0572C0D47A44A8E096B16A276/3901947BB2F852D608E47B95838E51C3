@@ -1,0 +1,40 @@
+﻿// プロジェクト切り替え
+        private void SwitchToProject(ProjectData project)
+        {
+            // 現在のプロジェクト状態を保存
+            SaveCurrentProjectState();
+
+            // 全プロジェクトのアクティブ状態をリセット
+            foreach (var p in allProjects)
+            {
+                p.IsActive = false;
+            }
+
+            // 新しいプロジェクトをアクティブに設定
+            project.IsActive = true;
+            currentProject = project;
+
+            // UIを更新
+            selectedFolderPath = project.FolderPath;
+            pdfOutputFolder = project.PdfOutputFolder;
+            txtFolderPath.Text = selectedFolderPath;
+            txtMergeFileName.Text = project.MergeFileName;
+            chkAddPageNumber.IsChecked = project.AddPageNumber;
+
+            // サブフォルダ読み込み設定を復元
+            if (chkIncludeSubfolders != null)
+                chkIncludeSubfolders.IsChecked = project.IncludeSubfolders;
+            if (txtCustomPdfOutputFolder != null)
+                txtCustomPdfOutputFolder.Text = project.CustomPdfOutputFolder;
+
+            // 最新結合PDFの表示を更新
+            UpdateLatestMergedPdfDisplay();
+
+            // ファイルアイテムを復元
+            RestoreFileItems(project);
+
+            // プロジェクト名を更新
+            UpdateProjectDisplay();
+
+            SaveProjects();
+        }

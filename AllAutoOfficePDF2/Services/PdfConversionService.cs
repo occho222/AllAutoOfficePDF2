@@ -1,0 +1,349 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
+using System.Threading.Tasks;
+using WordInterop = Microsoft.Office.Interop.Word;
+using ExcelInterop = Microsoft.Office.Interop.Excel;
+using System.Diagnostics;
+using AllAutoOfficePDF2.Models;
+
+namespace AllAutoOfficePDF2.Services
+{
+    /// <summary>
+    /// PDF変換サービス
+    /// </summary>
+    public class PdfConversionService
+    {
+        /// <summary>
+        /// Office文書をPDFに変換
+        /// </summary>
+        /// <param name="filePath">変換元ファイルパス</param>
+        /// <param name="pdfOutputFolder">PDF出力フォルダ</param>
+        /// <param name="targetPages">対象ページ</param>
+        public static void ConvertToPdf(string filePath, string pdfOutputFolder, string targetPages = "")
+        {
+            var extension = Path.GetExtension(filePath).ToLower();
+            var outputPath = Path.Combine(pdfOutputFolder, Path.GetFileNameWithoutExtension(filePath) + ".pdf");
+
+            switch (extension)
+            {
+                case ".xls":
+                case ".xlsx":
+                case ".xlsm":
+                    ConvertExcelToPdf(filePath, outputPath, targetPages);
+                    break;
+                case ".doc":
+                case ".docx":
+                    ConvertWordToPdf(filePath, outputPath, targetPages);
+                    break;
+                case ".ppt":
+                case ".pptx":
+                    ConvertPowerPointToPdf(filePath, outputPath, targetPages);
+                    break;
+                case ".pdf":
+                    // PDFファイルの場合はコピー
+                    if (!File.Exists(outputPath))
+                        File.Copy(filePath, outputPath, overwrite: false);
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Excel→PDF変換
+        /// </summary>
+        /// <param name="inputPath">入力ファイルパス</param>
+        /// <param name="outputPath">出力ファイルパス</param>
+        /// <param name="targetPages">対象ページ</param>
+        private static void ConvertExcelToPdf(string inputPath, string outputPath, string targetPages = "")
+        {
+            ExcelInterop.Application? excelApp = null;
+            ExcelInterop.Workbook? workbook = null;
+
+            try
+            {
+                excelApp = new ExcelInterop.Application();
+                excelApp.Visible = false;
+                workbook = excelApp.Workbooks.Open(inputPath);
+
+                var targetSheets = ParsePageRange(targetPages);
+
+                if (targetSheets.Any())
+                {
+                    // 指定シートのみ変換
+                    var totalSheets = workbook.Worksheets.Count;
+
+                    // 存在しないシートのチェック
+                    var invalidSheets = targetSheets.Where(s => s > totalSheets).ToList();
+                    if (invalidSheets.Any())
+                    {
+                        throw new ArgumentException($"存在しないシート番号が指定されています: {string.Join(", ", invalidSheets)} (総シート数: {totalSheets})");
+                    }
+
+                    // 指定シートを選択
+                    var sheetsToSelect = new ExcelInterop.Worksheet[targetSheets.Count];
+                    for (int i = 0; i < targetSheets.Count; i++)
+                    {
+                        sheetsToSelect[i] = (ExcelInterop.Worksheet)workbook.Worksheets[targetSheets[i]];
+                    }
+
+                    // 複数シートを選択
+                    if (sheetsToSelect.Length > 1)
+                    {
+                        sheetsToSelect[0].Select();
+                        for (int i = 1; i < sheetsToSelect.Length; i++)
+                        {
+                            sheetsToSelect[i].Select(false); // 追加選択
+                        }
+                    }
+                    else
+                    {
+                        sheetsToSelect[0].Select();
+                    }
+
+                    // 選択されたシートをPDF変換
+                    ((ExcelInterop.Worksheet)excelApp.ActiveSheet).ExportAsFixedFormat(ExcelInterop.XlFixedFormatType.xlTypePDF, outputPath);
+                }
+                else
+                {
+                    // 全シート変換
+                    workbook.ExportAsFixedFormat(ExcelInterop.XlFixedFormatType.xlTypePDF, outputPath);
+                }
+            }
+            finally
+            {
+                workbook?.Close(false);
+                excelApp?.Quit();
+                if (workbook != null) ReleaseComObject(workbook);
+                if (excelApp != null) ReleaseComObject(excelApp);
+            }
+        }
+
+        /// <summary>
+        /// Word→PDF変換
+        /// </summary>
+        /// <param name="inputPath">入力ファイルパス</param>
+        /// <param name="outputPath">出力ファイルパス</param>
+        /// <param name="targetPages">対象ページ</param>
+        private static void ConvertWordToPdf(string inputPath, string outputPath, string targetPages = "")
+        {
+            WordInterop.Application? wordApp = null;
+            WordInterop.Document? document = null;
+
+            try
+            {
+                wordApp = new WordInterop.Application();
+                wordApp.Visible = false;
+                document = wordApp.Documents.Open(inputPath);
+
+                var targetPageList = ParsePageRange(targetPages);
+
+                if (targetPageList.Any())
+                {
+                    // 指定ページのみ変換
+                    var totalPages = document.ComputeStatistics(WordInterop.WdStatistic.wdStatisticPages);
+
+                    // 存在しないページのチェック
+                    var invalidPages = targetPageList.Where(p => p > totalPages).ToList();
+                    if (invalidPages.Any())
+                    {
+                        throw new ArgumentException($"存在しないページ番号が指定されています: {string.Join(", ", invalidPages)} (総ページ数: {totalPages})");
+                    }
+
+                    // ページ範囲指定でPDF出力
+                    document.ExportAsFixedFormat(outputPath, WordInterop.WdExportFormat.wdExportFormatPDF,
+                        Range: WordInterop.WdExportRange.wdExportFromTo,
+                        From: targetPageList.Min(),
+                        To: targetPageList.Max());
+                }
+                else
+                {
+                    // 全ページ変換
+                    document.ExportAsFixedFormat(outputPath, WordInterop.WdExportFormat.wdExportFormatPDF);
+                }
+            }
+            finally
+            {
+                document?.Close(false);
+                wordApp?.Quit();
+                if (document != null) ReleaseComObject(document);
+                if (wordApp != null) ReleaseComObject(wordApp);
+            }
+        }
+
+        /// <summary>
+        /// PowerPoint→PDF変換
+        /// </summary>
+        /// <param name="inputPath">入力ファイルパス</param>
+        /// <param name="outputPath">出力ファイルパス</param>
+        /// <param name="targetPages">対象ページ</param>
+        private static void ConvertPowerPointToPdf(string inputPath, string outputPath, string targetPages = "")
+        {
+            dynamic? pptApp = null;
+            dynamic? presentation = null;
+            string? tempPdfPath = null;
+
+            try
+            {
+                pptApp = Activator.CreateInstance(Type.GetTypeFromProgID("PowerPoint.Application"));
+                presentation = pptApp.Presentations.Open(inputPath);
+
+                var targetSlides = ParsePageRange(targetPages);
+                var totalSlides = presentation.Slides.Count;
+
+                if (targetSlides.Any())
+                {
+                    // 存在しないスライドのチェック
+                    var invalidSlides = targetSlides.Where(s => s > totalSlides).ToList();
+                    if (invalidSlides.Any())
+                    {
+                        throw new ArgumentException($"存在しないスライド番号が指定されています: {string.Join(", ", invalidSlides)} (総スライド数: {totalSlides})");
+                    }
+
+                    // 一時的に全スライドをPDFに変換
+                    tempPdfPath = Path.Combine(Path.GetTempPath(), $"temp_ppt_{Guid.NewGuid()}.pdf");
+                    presentation.SaveAs(tempPdfPath, 32); // 32 = ppSaveAsPDF
+
+                    // PowerPointを閉じる
+                    presentation.Close();
+                    pptApp.Quit();
+                    ReleaseComObject(presentation);
+                    ReleaseComObject(pptApp);
+                    presentation = null;
+                    pptApp = null;
+
+                    // 一時的なGC実行
+                    GC.Collect();
+                    GC.WaitForPendingFinalizers();
+
+                    // 指定されたページのみを抽出してPDFを作成
+                    ExtractPdfPages(tempPdfPath, outputPath, targetSlides);
+                }
+                else
+                {
+                    // 全スライド変換（元のプレゼンテーションをそのまま使用）
+                    presentation.SaveAs(outputPath, 32); // 32 = ppSaveAsPDF
+                }
+
+                presentation?.Close();
+            }
+            finally
+            {
+                try { pptApp?.Quit(); } catch { }
+                if (presentation != null) ReleaseComObject(presentation);
+                if (pptApp != null) ReleaseComObject(pptApp);
+
+                // 一時ファイルを削除
+                if (!string.IsNullOrEmpty(tempPdfPath) && File.Exists(tempPdfPath))
+                {
+                    try
+                    {
+                        File.Delete(tempPdfPath);
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"一時ファイル削除に失敗: {ex.Message}");
+                    }
+                }
+
+                // 念のためGCを2回
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+
+                // PowerPointプロセスが残っていれば強制終了（最終手段）
+                foreach (var proc in Process.GetProcessesByName("POWERPNT"))
+                {
+                    try { proc.Kill(); } catch { }
+                }
+            }
+        }
+
+        /// <summary>
+        /// ページ範囲を解析
+        /// </summary>
+        /// <param name="pageRange">ページ範囲文字列</param>
+        /// <returns>ページ番号リスト</returns>
+        private static List<int> ParsePageRange(string pageRange)
+        {
+            var pages = new List<int>();
+            if (string.IsNullOrWhiteSpace(pageRange))
+                return pages;
+
+            try
+            {
+                var parts = pageRange.Split(',');
+                foreach (var part in parts)
+                {
+                    var trimmed = part.Trim();
+                    if (trimmed.Contains('-'))
+                    {
+                        var range = trimmed.Split('-');
+                        if (range.Length == 2 && int.TryParse(range[0], out int start) && int.TryParse(range[1], out int end))
+                        {
+                            for (int i = start; i <= end; i++)
+                            {
+                                if (i > 0 && !pages.Contains(i))
+                                    pages.Add(i);
+                            }
+                        }
+                    }
+                    else if (int.TryParse(trimmed, out int page))
+                    {
+                        if (page > 0 && !pages.Contains(page))
+                            pages.Add(page);
+                    }
+                }
+            }
+            catch
+            {
+                throw new ArgumentException($"無効なページ範囲指定: {pageRange}");
+            }
+
+            return pages.OrderBy(p => p).ToList();
+        }
+
+        /// <summary>
+        /// PDFから指定されたページのみを抽出
+        /// </summary>
+        /// <param name="inputPdfPath">入力PDFファイルパス</param>
+        /// <param name="outputPdfPath">出力PDFファイルパス</param>
+        /// <param name="pageNumbers">ページ番号リスト</param>
+        private static void ExtractPdfPages(string inputPdfPath, string outputPdfPath, List<int> pageNumbers)
+        {
+            using (var inputReader = new PdfReader(inputPdfPath))
+            using (var outputDocument = new Document())
+            using (var outputWriter = new PdfCopy(outputDocument, new FileStream(outputPdfPath, FileMode.Create)))
+            {
+                outputDocument.Open();
+
+                foreach (var pageNumber in pageNumbers.OrderBy(p => p))
+                {
+                    if (pageNumber <= inputReader.NumberOfPages)
+                    {
+                        var page = outputWriter.GetImportedPage(inputReader, pageNumber);
+                        outputWriter.AddPage(page);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// COMオブジェクトを解放
+        /// </summary>
+        /// <param name="obj">解放対象オブジェクト</param>
+        private static void ReleaseComObject(object? obj)
+        {
+            if (obj != null)
+            {
+                System.Runtime.InteropServices.Marshal.ReleaseComObject(obj);
+                obj = null;
+            }
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+        }
+    }
+}

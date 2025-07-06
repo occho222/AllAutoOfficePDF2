@@ -1,0 +1,776 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using AllAutoOfficePDF2.Models;
+using AllAutoOfficePDF2.Services;
+using AllAutoOfficePDF2.Views;
+
+namespace AllAutoOfficePDF2
+{
+    /// <summary>
+    /// メインウィンドウ
+    /// </summary>
+    public partial class MainWindow : Window
+    {
+        #region プライベートフィールド
+        private ObservableCollection<FileItem> fileItems = new ObservableCollection<FileItem>();
+        private ObservableCollection<ProjectData> projects = new ObservableCollection<ProjectData>();
+        private ProjectData? currentProject = null;
+        private string selectedFolderPath = "";
+        private string pdfOutputFolder = "";
+        #endregion
+
+        #region コンストラクタ
+        public MainWindow()
+        {
+            InitializeComponent();
+            InitializeDataBindings();
+            LoadProjects();
+            RestoreActiveProject();
+            UpdateProjectDisplay();
+        }
+        #endregion
+
+        #region 初期化
+        private void InitializeDataBindings()
+        {
+            dgFiles.ItemsSource = fileItems;
+            lstProjects.ItemsSource = projects;
+        }
+
+        private void LoadProjects()
+        {
+            projects.Clear();
+            var projectList = ProjectManager.LoadProjects();
+            foreach (var project in projectList)
+            {
+                projects.Add(project);
+            }
+        }
+
+        private void RestoreActiveProject()
+        {
+            var activeProject = projects.FirstOrDefault(p => p.IsActive);
+            if (activeProject != null)
+            {
+                SwitchToProject(activeProject);
+            }
+            else
+            {
+                UpdateLatestMergedPdfDisplay();
+            }
+        }
+        #endregion
+
+        #region プロジェクト管理
+        private void BtnNewProject_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new ProjectEditDialog();
+            if (dialog.ShowDialog() == true)
+            {
+                var newProject = new ProjectData
+                {
+                    Name = dialog.ProjectName,
+                    FolderPath = dialog.FolderPath,
+                    PdfOutputFolder = Path.Combine(dialog.FolderPath, "PDF")
+                };
+
+                projects.Add(newProject);
+                SwitchToProject(newProject);
+            }
+        }
+
+        private void BtnEditProject_Click(object sender, RoutedEventArgs e)
+        {
+            if (lstProjects.SelectedItem is ProjectData selectedProject)
+            {
+                var dialog = new ProjectEditDialog();
+                dialog.ProjectName = selectedProject.Name;
+                dialog.FolderPath = selectedProject.FolderPath;
+
+                if (dialog.ShowDialog() == true)
+                {
+                    selectedProject.Name = dialog.ProjectName;
+                    selectedProject.FolderPath = dialog.FolderPath;
+                    selectedProject.PdfOutputFolder = Path.Combine(dialog.FolderPath, "PDF");
+
+                    if (selectedProject == currentProject)
+                    {
+                        selectedFolderPath = selectedProject.FolderPath;
+                        pdfOutputFolder = selectedProject.PdfOutputFolder;
+                        txtFolderPath.Text = selectedFolderPath;
+                        UpdateProjectDisplay();
+                    }
+
+                    SaveProjects();
+                }
+            }
+        }
+
+        private void BtnDeleteProject_Click(object sender, RoutedEventArgs e)
+        {
+            if (lstProjects.SelectedItem is ProjectData selectedProject)
+            {
+                var result = MessageBox.Show($"プロジェクト '{selectedProject.Name}' を削除しますか？",
+                    "確認", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    projects.Remove(selectedProject);
+
+                    if (selectedProject == currentProject)
+                    {
+                        currentProject = null;
+                        fileItems.Clear();
+                        selectedFolderPath = "";
+                        pdfOutputFolder = "";
+                        txtFolderPath.Text = "";
+                        UpdateProjectDisplay();
+                    }
+
+                    SaveProjects();
+                }
+            }
+        }
+
+        private void BtnSwitchProject_Click(object sender, RoutedEventArgs e)
+        {
+            if (lstProjects.SelectedItem is ProjectData selectedProject)
+            {
+                SwitchToProject(selectedProject);
+            }
+        }
+
+        private void LstProjects_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (lstProjects.SelectedItem is ProjectData selectedProject)
+            {
+                SwitchToProject(selectedProject);
+            }
+        }
+
+        private void BtnConvertToProject_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(selectedFolderPath))
+            {
+                MessageBox.Show("先にフォルダを選択してください。", "エラー",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var folderName = Path.GetFileName(selectedFolderPath);
+            var dialog = new ProjectEditDialog();
+            dialog.ProjectName = folderName;
+            dialog.FolderPath = selectedFolderPath;
+
+            if (dialog.ShowDialog() == true)
+            {
+                var newProject = new ProjectData
+                {
+                    Name = dialog.ProjectName,
+                    FolderPath = dialog.FolderPath,
+                    PdfOutputFolder = Path.Combine(dialog.FolderPath, "PDF"),
+                    MergeFileName = txtMergeFileName.Text,
+                    AddPageNumber = chkAddPageNumber.IsChecked ?? false
+                };
+
+                // 現在のファイル状態を保存
+                foreach (var item in fileItems)
+                {
+                    newProject.FileItems.Add(new FileItemData
+                    {
+                        IsSelected = item.IsSelected,
+                        TargetPages = item.TargetPages,
+                        FilePath = item.FilePath,
+                        LastModified = item.LastModified,
+                        DisplayOrder = item.DisplayOrder
+                    });
+                }
+
+                projects.Add(newProject);
+                SwitchToProject(newProject);
+
+                MessageBox.Show($"プロジェクト '{newProject.Name}' を作成しました。", "完了",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        private void SwitchToProject(ProjectData project)
+        {
+            SaveCurrentProjectState();
+
+            // 全プロジェクトのアクティブ状態をリセット
+            foreach (var p in projects)
+            {
+                p.IsActive = false;
+            }
+
+            // 新しいプロジェクトをアクティブに設定
+            project.IsActive = true;
+            currentProject = project;
+
+            // UIを更新
+            selectedFolderPath = project.FolderPath;
+            pdfOutputFolder = project.PdfOutputFolder;
+            txtFolderPath.Text = selectedFolderPath;
+            txtMergeFileName.Text = project.MergeFileName;
+            chkAddPageNumber.IsChecked = project.AddPageNumber;
+
+            UpdateLatestMergedPdfDisplay();
+            RestoreFileItems(project);
+            UpdateProjectDisplay();
+            SaveProjects();
+        }
+
+        private void SaveProjects()
+        {
+            ProjectManager.SaveProjects(projects.ToList());
+        }
+
+        private void SaveCurrentProjectState()
+        {
+            if (currentProject != null)
+            {
+                currentProject.FolderPath = selectedFolderPath;
+                currentProject.PdfOutputFolder = pdfOutputFolder;
+                currentProject.MergeFileName = txtMergeFileName.Text;
+                currentProject.AddPageNumber = chkAddPageNumber.IsChecked ?? false;
+                currentProject.LastAccessDate = DateTime.Now;
+
+                // ファイルアイテムの状態を保存
+                currentProject.FileItems.Clear();
+                foreach (var item in fileItems)
+                {
+                    currentProject.FileItems.Add(new FileItemData
+                    {
+                        IsSelected = item.IsSelected,
+                        TargetPages = item.TargetPages,
+                        FilePath = item.FilePath,
+                        LastModified = item.LastModified,
+                        DisplayOrder = item.DisplayOrder
+                    });
+                }
+
+                SaveProjects();
+            }
+        }
+
+        private void UpdateProjectDisplay()
+        {
+            if (currentProject != null)
+            {
+                lblCurrentProject.Content = $"現在のプロジェクト: {currentProject.Name}";
+                Title = $"AllAutoOfficePDF2 - {currentProject.Name}";
+            }
+            else
+            {
+                lblCurrentProject.Content = "現在のプロジェクト: なし";
+                Title = "AllAutoOfficePDF2";
+            }
+        }
+        #endregion
+
+        #region ファイル管理
+        private void BtnSelectFolder_Click(object sender, RoutedEventArgs e)
+        {
+            using (var dialog = new System.Windows.Forms.FolderBrowserDialog())
+            {
+                dialog.Description = "対象フォルダを選択してください";
+                if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                {
+                    selectedFolderPath = dialog.SelectedPath;
+                    txtFolderPath.Text = selectedFolderPath;
+                    pdfOutputFolder = Path.Combine(selectedFolderPath, "PDF");
+                    
+                    if (currentProject != null)
+                    {
+                        currentProject.FolderPath = selectedFolderPath;
+                        currentProject.PdfOutputFolder = pdfOutputFolder;
+                        SaveProjects();
+                    }
+                    
+                    txtStatus.Text = "フォルダが選択されました";
+                }
+            }
+        }
+
+        private void BtnReadFolder_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(selectedFolderPath))
+            {
+                MessageBox.Show("フォルダを選択してください", "エラー", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var loadedFileItems = FileManagementService.LoadFilesFromFolder(selectedFolderPath, pdfOutputFolder);
+            
+            fileItems.Clear();
+            for (int i = 0; i < loadedFileItems.Count; i++)
+            {
+                loadedFileItems[i].Number = i + 1;
+                loadedFileItems[i].DisplayOrder = i;
+                fileItems.Add(loadedFileItems[i]);
+            }
+
+            txtStatus.Text = $"{fileItems.Count}個のファイルを読み込みました";
+            SaveCurrentProjectState();
+        }
+
+        private void BtnUpdateFiles_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(selectedFolderPath))
+            {
+                MessageBox.Show("フォルダを選択してください", "エラー", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var (updatedItems, changedFiles, addedFiles, deletedFiles) = 
+                FileManagementService.UpdateFiles(selectedFolderPath, pdfOutputFolder, fileItems.ToList());
+
+            fileItems.Clear();
+            foreach (var item in updatedItems)
+            {
+                fileItems.Add(item);
+            }
+
+            // 結果メッセージを作成
+            var statusMessages = new List<string>();
+            statusMessages.Add($"{fileItems.Count}個のファイルを更新しました");
+
+            if (changedFiles.Any())
+                statusMessages.Add($"変更されたファイル: {changedFiles.Count}個");
+
+            if (addedFiles.Any())
+                statusMessages.Add($"追加されたファイル: {addedFiles.Count}個");
+
+            if (deletedFiles.Any())
+            {
+                statusMessages.Add($"削除されたファイル: {deletedFiles.Count}個");
+                
+                var deletedMessage = $"以下のファイルが削除されました：\n{string.Join("\n", deletedFiles)}";
+                if (deletedFiles.Any(f => !f.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase)))
+                {
+                    deletedMessage += "\n\n対応するPDFファイルも削除されました。";
+                }
+                MessageBox.Show(deletedMessage, "削除されたファイル", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+
+            txtStatus.Text = string.Join(" / ", statusMessages);
+            SaveCurrentProjectState();
+        }
+
+        private void RestoreFileItems(ProjectData project)
+        {
+            fileItems.Clear();
+
+            if (string.IsNullOrEmpty(project.FolderPath) || !Directory.Exists(project.FolderPath))
+            {
+                txtStatus.Text = "プロジェクトフォルダが見つかりません";
+                return;
+            }
+
+            var loadedFileItems = FileManagementService.LoadFilesFromFolder(project.FolderPath, project.PdfOutputFolder);
+            
+            // 保存された状態を復元
+            foreach (var item in loadedFileItems)
+            {
+                var savedItem = project.FileItems.FirstOrDefault(f => f.FilePath == item.FilePath);
+                if (savedItem != null)
+                {
+                    item.IsSelected = savedItem.IsSelected;
+                    item.TargetPages = savedItem.TargetPages;
+                    item.DisplayOrder = savedItem.DisplayOrder >= 0 ? savedItem.DisplayOrder : loadedFileItems.Count;
+                }
+            }
+
+            // 表示順序で並び替え
+            var orderedItems = loadedFileItems
+                .OrderBy(f => f.DisplayOrder)
+                .ThenBy(f => f.FileName)
+                .ToList();
+
+            for (int i = 0; i < orderedItems.Count; i++)
+            {
+                orderedItems[i].Number = i + 1;
+                orderedItems[i].DisplayOrder = i;
+                fileItems.Add(orderedItems[i]);
+            }
+
+            txtStatus.Text = $"プロジェクト '{project.Name}' を読み込みました ({fileItems.Count}個のファイル)";
+        }
+        #endregion
+
+        #region ファイル操作
+        private void BtnMoveUp_Click(object sender, RoutedEventArgs e)
+        {
+            if (dgFiles.SelectedIndex > 0)
+            {
+                var selectedIndex = dgFiles.SelectedIndex;
+                var item = fileItems[selectedIndex];
+                fileItems.RemoveAt(selectedIndex);
+                fileItems.Insert(selectedIndex - 1, item);
+                
+                UpdateFileNumbers();
+                dgFiles.SelectedIndex = selectedIndex - 1;
+                SaveCurrentProjectState();
+            }
+        }
+
+        private void BtnMoveDown_Click(object sender, RoutedEventArgs e)
+        {
+            if (dgFiles.SelectedIndex >= 0 && dgFiles.SelectedIndex < fileItems.Count - 1)
+            {
+                var selectedIndex = dgFiles.SelectedIndex;
+                var item = fileItems[selectedIndex];
+                fileItems.RemoveAt(selectedIndex);
+                fileItems.Insert(selectedIndex + 1, item);
+                
+                UpdateFileNumbers();
+                dgFiles.SelectedIndex = selectedIndex + 1;
+                SaveCurrentProjectState();
+            }
+        }
+
+        private void BtnSortByName_Click(object sender, RoutedEventArgs e)
+        {
+            var sortedItems = fileItems.OrderBy(f => f.FileName).ToList();
+            fileItems.Clear();
+            
+            for (int i = 0; i < sortedItems.Count; i++)
+            {
+                sortedItems[i].Number = i + 1;
+                sortedItems[i].DisplayOrder = i;
+                fileItems.Add(sortedItems[i]);
+            }
+            
+            SaveCurrentProjectState();
+            txtStatus.Text = "ファイル名順に並び替えました";
+        }
+
+        private void UpdateFileNumbers()
+        {
+            for (int i = 0; i < fileItems.Count; i++)
+            {
+                fileItems[i].Number = i + 1;
+                fileItems[i].DisplayOrder = i;
+            }
+        }
+
+        private void ChkSelectAll_Click(object sender, RoutedEventArgs e)
+        {
+            var isChecked = chkSelectAll.IsChecked ?? false;
+            foreach (var item in fileItems)
+            {
+                item.IsSelected = isChecked;
+            }
+            SaveCurrentProjectState();
+        }
+
+        private void FileName_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is TextBlock textBlock && textBlock.DataContext is FileItem fileItem)
+            {
+                OpenFile(fileItem.FilePath);
+            }
+        }
+
+        private void OpenFile(string filePath)
+        {
+            if (File.Exists(filePath))
+            {
+                try
+                {
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = filePath,
+                        UseShellExecute = true
+                    });
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"ファイルを開けませんでした: {ex.Message}", "エラー",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            else
+            {
+                MessageBox.Show("ファイルが見つかりません。", "エラー",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+        #endregion
+
+        #region PDF処理
+        private async void BtnConvertPDF_Click(object sender, RoutedEventArgs e)
+        {
+            var selectedFiles = fileItems.Where(f => f.IsSelected).ToList();
+            if (!selectedFiles.Any())
+            {
+                MessageBox.Show("変換するファイルを選択してください", "情報", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            if (!Directory.Exists(pdfOutputFolder))
+                Directory.CreateDirectory(pdfOutputFolder);
+
+            progressBar.Visibility = Visibility.Visible;
+            progressBar.Maximum = selectedFiles.Count;
+            progressBar.Value = 0;
+
+            await Task.Run(() =>
+            {
+                foreach (var file in selectedFiles)
+                {
+                    try
+                    {
+                        PdfConversionService.ConvertToPdf(file.FilePath, pdfOutputFolder, file.TargetPages);
+
+                        Dispatcher.Invoke(() =>
+                        {
+                            file.PdfStatus = "変換済";
+                            file.IsSelected = false;
+                            progressBar.Value++;
+                            txtStatus.Text = $"変換中: {file.FileName}";
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        Dispatcher.Invoke(() =>
+                        {
+                            MessageBox.Show($"変換エラー: {file.FileName}\n{ex.Message}", "エラー",
+                                MessageBoxButton.OK, MessageBoxImage.Error);
+                        });
+                    }
+                }
+            });
+
+            progressBar.Visibility = Visibility.Collapsed;
+            txtStatus.Text = "PDF変換が完了しました";
+        }
+
+        private async void BtnMergePDF_Click(object sender, RoutedEventArgs e)
+        {
+            var allFiles = fileItems.OrderBy(f => f.DisplayOrder).ToList();
+            if (!allFiles.Any())
+            {
+                MessageBox.Show("結合対象のファイルがありません", "情報", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            // PDFファイルパスを取得
+            var pdfFilePaths = new List<string>();
+            var missingPdfFiles = new List<string>();
+
+            foreach (var file in allFiles)
+            {
+                string pdfPath = file.Extension.ToLower() == "pdf" 
+                    ? file.FilePath 
+                    : Path.Combine(pdfOutputFolder, Path.GetFileNameWithoutExtension(file.FileName) + ".pdf");
+
+                if (File.Exists(pdfPath))
+                {
+                    pdfFilePaths.Add(pdfPath);
+                }
+                else
+                {
+                    missingPdfFiles.Add(file.FileName);
+                }
+            }
+
+            if (missingPdfFiles.Any())
+            {
+                var message = "以下のファイルに対応するPDFファイルが見つかりません:\n\n";
+                message += string.Join("\n", missingPdfFiles);
+                message += "\n\n先にPDF変換を実行してください。";
+                
+                MessageBox.Show(message, "PDFファイル不足", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var mergeFolder = Path.Combine(selectedFolderPath, "mergePDF");
+            if (!Directory.Exists(mergeFolder))
+                Directory.CreateDirectory(mergeFolder);
+
+            var mergeFileName = txtMergeFileName.Text;
+            var addPageNumber = chkAddPageNumber.IsChecked == true;
+            var timestamp = DateTime.Now.ToString("yyMMddHHmmss");
+            var outputFileName = $"{mergeFileName}_{timestamp}.pdf";
+            var outputPath = Path.Combine(mergeFolder, outputFileName);
+
+            progressBar.Visibility = Visibility.Visible;
+            progressBar.IsIndeterminate = true;
+            txtStatus.Text = "PDF結合中...";
+
+            bool mergeSuccess = false;
+            
+            await Task.Run(() =>
+            {
+                try
+                {
+                    PdfMergeService.MergePdfFiles(pdfFilePaths, outputPath, addPageNumber);
+                    mergeSuccess = true;
+                }
+                catch (Exception ex)
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        MessageBox.Show($"PDF結合エラー: {ex.Message}", "エラー",
+                            MessageBoxButton.OK, MessageBoxImage.Error);
+                    });
+                }
+            });
+
+            progressBar.Visibility = Visibility.Collapsed;
+            
+            if (mergeSuccess)
+            {
+                if (currentProject != null)
+                {
+                    currentProject.LatestMergedPdfPath = outputPath;
+                    SaveProjects();
+                }
+
+                UpdateLatestMergedPdfDisplay();
+                txtStatus.Text = "PDF結合が完了しました";
+                
+                var result = MessageBox.Show("PDFを開きますか？", "PDF結合完了", 
+                    MessageBoxButton.YesNo, MessageBoxImage.Question);
+                
+                if (result == MessageBoxResult.Yes)
+                {
+                    OpenFile(outputPath);
+                }
+                else
+                {
+                    try
+                    {
+                        Process.Start("explorer.exe", mergeFolder);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"フォルダを開けませんでした: {ex.Message}", "エラー",
+                            MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
+        }
+
+        private void UpdateLatestMergedPdfDisplay()
+        {
+            if (currentProject != null && !string.IsNullOrEmpty(currentProject.LatestMergedPdfPath))
+            {
+                if (File.Exists(currentProject.LatestMergedPdfPath))
+                {
+                    txtLatestMergedPDF.Text = Path.GetFileName(currentProject.LatestMergedPdfPath);
+                    btnOpenLatestMergedPDF.IsEnabled = true;
+                }
+                else
+                {
+                    txtLatestMergedPDF.Text = "ファイルが見つかりません";
+                    btnOpenLatestMergedPDF.IsEnabled = false;
+                }
+            }
+            else
+            {
+                txtLatestMergedPDF.Text = "まだ結合されていません";
+                btnOpenLatestMergedPDF.IsEnabled = false;
+            }
+        }
+
+        private void BtnOpenLatestMergedPDF_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentProject != null && !string.IsNullOrEmpty(currentProject.LatestMergedPdfPath))
+            {
+                if (File.Exists(currentProject.LatestMergedPdfPath))
+                {
+                    OpenFile(currentProject.LatestMergedPdfPath);
+                }
+                else
+                {
+                    MessageBox.Show("結合PDFファイルが見つかりません。", "エラー",
+                        MessageBoxButton.OK, MessageBoxImage.Warning);
+                    UpdateLatestMergedPdfDisplay();
+                }
+            }
+            else
+            {
+                MessageBox.Show("結合PDFファイルがありません。", "情報",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+        #endregion
+
+        #region フォルダ操作
+        private void BtnOpenProjectFolder_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Tag is ProjectData project)
+            {
+                if (Directory.Exists(project.FolderPath))
+                {
+                    try
+                    {
+                        Process.Start("explorer.exe", project.FolderPath);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"フォルダを開けませんでした: {ex.Message}", "エラー",
+                            MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("フォルダが見つかりません。", "エラー",
+                        MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+            }
+        }
+
+        private void BtnOpenCurrentProjectFolder_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentProject != null && Directory.Exists(currentProject.FolderPath))
+            {
+                try
+                {
+                    Process.Start("explorer.exe", currentProject.FolderPath);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"フォルダを開けませんでした: {ex.Message}", "エラー",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            else if (currentProject == null)
+            {
+                MessageBox.Show("現在のプロジェクトが選択されていません。", "エラー",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+            else
+            {
+                MessageBox.Show("フォルダが見つかりません。", "エラー",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+        #endregion
+
+        #region イベントハンドラ
+        private void LstProjects_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            // 選択されたプロジェクトの情報を更新
+            // 特別な処理が必要な場合はここに追加
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            SaveCurrentProjectState();
+            base.OnClosed(e);
+        }
+        #endregion
+    }
+}

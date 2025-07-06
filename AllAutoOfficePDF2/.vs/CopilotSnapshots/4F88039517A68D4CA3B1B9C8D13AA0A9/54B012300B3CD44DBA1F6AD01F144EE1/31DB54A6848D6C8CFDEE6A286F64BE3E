@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Windows;
 using System.Windows.Forms;
@@ -26,7 +26,7 @@ namespace AllAutoOfficePDF2
         {
             using (var dialog = new FolderBrowserDialog())
             {
-                dialog.Description = "Select project folder";
+                dialog.Description = "プロジェクトフォルダを選択してください";
                 if (!string.IsNullOrEmpty(txtFolderPath.Text))
                 {
                     dialog.SelectedPath = txtFolderPath.Text;
@@ -36,7 +36,7 @@ namespace AllAutoOfficePDF2
                 {
                     txtFolderPath.Text = dialog.SelectedPath;
                     
-                    // If project name is empty, set folder name
+                    // プロジェクト名が空の場合、フォルダ名を設定
                     if (string.IsNullOrEmpty(txtProjectName.Text))
                     {
                         txtProjectName.Text = Path.GetFileName(dialog.SelectedPath);

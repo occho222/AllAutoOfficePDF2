@@ -1,0 +1,69 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text.Json;
+using System.Windows;
+using AllAutoOfficePDF2.Models;
+
+namespace AllAutoOfficePDF2.Services
+{
+    /// <summary>
+    /// プロジェクト管理サービス
+    /// </summary>
+    public class ProjectManager
+    {
+        private static readonly string ProjectsFilePath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "AllAutoOfficePDF2",
+            "projects.json"
+        );
+
+        /// <summary>
+        /// プロジェクトを読み込み
+        /// </summary>
+        /// <returns>プロジェクトリスト</returns>
+        public static List<ProjectData> LoadProjects()
+        {
+            try
+            {
+                if (File.Exists(ProjectsFilePath))
+                {
+                    var json = File.ReadAllText(ProjectsFilePath);
+                    var projects = JsonSerializer.Deserialize<List<ProjectData>>(json) ?? new List<ProjectData>();
+                    return projects;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"プロジェクトの読み込みに失敗しました: {ex.Message}", "エラー",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+            return new List<ProjectData>();
+        }
+
+        /// <summary>
+        /// プロジェクトを保存
+        /// </summary>
+        /// <param name="projects">プロジェクトリスト</param>
+        public static void SaveProjects(List<ProjectData> projects)
+        {
+            try
+            {
+                var directory = Path.GetDirectoryName(ProjectsFilePath);
+                if (!Directory.Exists(directory))
+                    Directory.CreateDirectory(directory!);
+
+                var json = JsonSerializer.Serialize(projects, new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                });
+                File.WriteAllText(ProjectsFilePath, json);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"プロジェクトの保存に失敗しました: {ex.Message}", "エラー",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+    }
+}

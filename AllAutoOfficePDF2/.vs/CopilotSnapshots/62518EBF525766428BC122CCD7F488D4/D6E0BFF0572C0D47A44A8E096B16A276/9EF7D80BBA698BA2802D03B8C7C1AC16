@@ -1,0 +1,219 @@
+﻿// プロジェクト切り替え
+        private void SwitchToProject(ProjectData project)
+        {
+            // 現在のプロジェクト状態を保存
+            SaveCurrentProjectState();
+
+            // 全プロジェクトのアクティブ状態をリセット
+            foreach (var p in allProjects)
+            {
+                p.IsActive = false;
+            }
+
+            // 新しいプロジェクトをアクティブに設定
+            project.IsActive = true;
+            currentProject = project;
+
+            // UIを更新
+            selectedFolderPath = project.FolderPath;
+            pdfOutputFolder = project.PdfOutputFolder;
+            txtFolderPath.Text = selectedFolderPath;
+            txtMergeFileName.Text = project.MergeFileName;
+            chkAddPageNumber.IsChecked = project.AddPageNumber;
+
+            // サブフォルダ読み込み設定を復元
+            if (chkIncludeSubfolders != null)
+                chkIncludeSubfolders.IsChecked = project.IncludeSubfolders;
+            if (txtCustomPdfOutputFolder != null)
+                txtCustomPdfOutputFolder.Text = project.CustomPdfOutputFolder;
+
+            // 最新結合PDFの表示を更新
+            UpdateLatestMergedPdfDisplay();
+
+            // ファイルアイテムを復元
+            RestoreFileItems(project);
+
+            // プロジェクト名を更新
+            UpdateProjectDisplay();
+
+            SaveProjects();
+        }
+
+        // ファイル読込
+        private void BtnReadFolder_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(selectedFolderPath))
+            {
+                System.Windows.MessageBox.Show("フォルダを選択してください", "エラー", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var includeSubfolders = chkIncludeSubfolders?.IsChecked ?? false;
+            ReadFolderWithSubfolders(selectedFolderPath, includeSubfolders);
+        }
+
+        // ファイル更新
+        private void BtnUpdateFiles_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(selectedFolderPath))
+            {
+                System.Windows.MessageBox.Show("フォルダを選択してください", "エラー", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // 現在のファイル一覧を保存（変更・削除検出用）
+            var previousFiles = fileItems.ToDictionary(f => f.FilePath, f => f);
+
+            // 新しいファイル一覧を取得
+            var newFileItems = new List<FileItem>();
+            var extensions = new[] { "*.xls", "*.xlsx", "*.xlsm", "*.doc", "*.docx", "*.ppt", "*.pptx", "*.pdf" };
+            var changedFiles = new List<string>();
+            var addedFiles = new List<string>();
+
+            var includeSubfolders = chkIncludeSubfolders?.IsChecked ?? false;
+            var searchOption = includeSubfolders ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
+
+            foreach (var ext in extensions)
+            {
+                var files = Directory.GetFiles(selectedFolderPath, ext, searchOption);
+                foreach (var file in files)
+                {
+                    var fileInfo = new FileInfo(file);
+                    string extensionUpper = fileInfo.Extension.TrimStart('.').ToUpper();
+
+                    // サブフォルダ内のファイルの場合は相対パスを表示
+                    string displayName = includeSubfolders ? 
+                        Path.GetRelativePath(selectedFolderPath, fileInfo.FullName) : 
+                        fileInfo.Name;
+
+                    bool isSelected = true; // デフォルトで選択
+                    string targetPages = (extensionUpper == "XLS" || extensionUpper == "XLSX" || extensionUpper == "XLSM") ? "1-1" : "";
+                    int displayOrder = 0;
+
+                    // 既存ファイルの場合は更新日時をチェック
+                    if (previousFiles.TryGetValue(file, out var existingFile))
+                    {
+                        if (existingFile.LastModified != fileInfo.LastWriteTime)
+                        {
+                            // 更新日時が変更された場合
+                            changedFiles.Add(displayName);
+                            isSelected = true;
+                        }
+                        else
+                        {
+                            // 変更されていない場合は前の選択状態を保持
+                            isSelected = existingFile.IsSelected;
+                            targetPages = existingFile.TargetPages;
+                            displayOrder = existingFile.DisplayOrder;
+                        }
+                    }
+                    else
+                    {
+                        // 新規ファイルの場合
+                        addedFiles.Add(displayName);
+                        isSelected = true;
+                        displayOrder = previousFiles.Count + addedFiles.Count - 1; // 末尾に追加
+                    }
+
+                    var item = new FileItem
+                    {
+                        Number = 0, // 後で設定
+                        FileName = displayName,
+                        FilePath = fileInfo.FullName,
+                        Extension = extensionUpper,
+                        LastModified = fileInfo.LastWriteTime,
+                        IsSelected = isSelected,
+                        PdfStatus = CheckPdfExists(fileInfo, includeSubfolders) ? "変換済" : "未変換",
+                        TargetPages = targetPages,
+                        DisplayOrder = displayOrder
+                    };
+                    newFileItems.Add(item);
+                }
+            }
+
+            // 削除されたファイルを検出してPDFファイルを削除
+            var deletedFiles = new List<string>();
+            var currentFilePaths = newFileItems.Select(f => f.FilePath).ToHashSet();
+
+            foreach (var previousFile in previousFiles.Values)
+            {
+                if (!currentFilePaths.Contains(previousFile.FilePath))
+                {
+                    deletedFiles.Add(previousFile.FileName);
+
+                    // 対応するPDFファイルを削除
+                    if (previousFile.Extension.ToLower() != "pdf")
+                    {
+                        string pdfPath;
+                        if (includeSubfolders && currentProject != null && !string.IsNullOrEmpty(currentProject.CustomPdfOutputFolder))
+                        {
+                            pdfPath = Path.Combine(currentProject.CustomPdfOutputFolder, Path.GetFileNameWithoutExtension(previousFile.FileName) + ".pdf");
+                        }
+                        else
+                        {
+                            pdfPath = Path.Combine(pdfOutputFolder, Path.GetFileNameWithoutExtension(previousFile.FileName) + ".pdf");
+                        }
+
+                        if (File.Exists(pdfPath))
+                        {
+                            try
+                            {
+                                File.Delete(pdfPath);
+                            }
+                            catch (Exception ex)
+                            {
+                                System.Windows.MessageBox.Show($"PDFファイルの削除に失敗しました: {Path.GetFileName(pdfPath)}\n{ex.Message}",
+                                    "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // ファイル一覧を更新（表示順序を維持）
+            fileItems.Clear();
+            var orderedItems = newFileItems.OrderBy(f => f.DisplayOrder).ThenBy(f => f.FileName).ToList();
+            
+            for (int i = 0; i < orderedItems.Count; i++)
+            {
+                orderedItems[i].Number = i + 1;
+                orderedItems[i].DisplayOrder = i;
+                fileItems.Add(orderedItems[i]);
+            }
+
+            // 結果メッセージを作成
+            var statusMessages = new List<string>();
+            var baseMessage = includeSubfolders ? 
+                $"{fileItems.Count}個のファイルを更新しました（サブフォルダ含む）" :
+                $"{fileItems.Count}個のファイルを更新しました";
+            statusMessages.Add(baseMessage);
+
+            if (changedFiles.Any())
+            {
+                statusMessages.Add($"変更されたファイル: {changedFiles.Count}個");
+            }
+
+            if (addedFiles.Any())
+            {
+                statusMessages.Add($"追加されたファイル: {addedFiles.Count}個");
+            }
+
+            if (deletedFiles.Any())
+            {
+                statusMessages.Add($"削除されたファイル: {deletedFiles.Count}個");
+
+                // 削除されたファイルの詳細をメッセージボックスで表示
+                var deletedMessage = $"以下のファイルが削除されました：\n{string.Join("\n", deletedFiles)}";
+                if (deletedFiles.Any(f => !f.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase)))
+                {
+                    deletedMessage += "\n\n対応するPDFファイルも削除されました。";
+                }
+
+                System.Windows.MessageBox.Show(deletedMessage, "削除されたファイル", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+
+            txtStatus.Text = string.Join(" / ", statusMessages);
+            
+            // 現在のプロジェクトの状態を保存
+            SaveCurrentProjectState();
+        }

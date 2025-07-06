@@ -1,0 +1,83 @@
+﻿using System;
+using System.IO;
+using System.Windows;
+using System.Windows.Forms;
+using MessageBox = System.Windows.MessageBox;
+
+namespace AllAutoOfficePDF2
+{
+    public partial class ProjectEditDialog : System.Windows.Window
+    {
+        public string ProjectName { get; set; } = "";
+        public string FolderPath { get; set; } = "";
+
+        public ProjectEditDialog()
+        {
+            InitializeComponent();
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            txtProjectName.Text = ProjectName;
+            txtFolderPath.Text = FolderPath;
+        }
+
+        private void BtnSelectFolder_Click(object sender, RoutedEventArgs e)
+        {
+            using (var dialog = new FolderBrowserDialog())
+            {
+                dialog.Description = "プロジェクトフォルダを選択してください";
+                if (!string.IsNullOrEmpty(txtFolderPath.Text))
+                {
+                    dialog.SelectedPath = txtFolderPath.Text;
+                }
+
+                if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                {
+                    txtFolderPath.Text = dialog.SelectedPath;
+                    
+                    // プロジェクト名が空の場合、フォルダ名を設定
+                    if (string.IsNullOrEmpty(txtProjectName.Text))
+                    {
+                        txtProjectName.Text = Path.GetFileName(dialog.SelectedPath);
+                    }
+                }
+            }
+        }
+
+        private void BtnOK_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(txtProjectName.Text))
+            {
+                MessageBox.Show("プロジェクト名を入力してください。", "エラー", 
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(txtFolderPath.Text))
+            {
+                MessageBox.Show("フォルダを選択してください。", "エラー", 
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            if (!Directory.Exists(txtFolderPath.Text))
+            {
+                MessageBox.Show("選択されたフォルダが存在しません。", "エラー", 
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            ProjectName = txtProjectName.Text.Trim();
+            FolderPath = txtFolderPath.Text.Trim();
+            DialogResult = true;
+            Close();
+        }
+
+        private void BtnCancel_Click(object sender, RoutedEventArgs e)
+        {
+            DialogResult = false;
+            Close();
+        }
+    }
+}
