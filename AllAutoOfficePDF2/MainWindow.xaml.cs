@@ -22,7 +22,7 @@ namespace AllAutoOfficePDF2
     {
         #region プライベートフィールド
         private ObservableCollection<FileItem> fileItems = new ObservableCollection<FileItem>();
-        private ObservableCollection<ProjectData> projects = new ObservableCollection<ProjectData>();
+        private ObservableCollection<ProjectCategoryGroup> categoryGroups = new ObservableCollection<ProjectCategoryGroup>();
         private ProjectData? currentProject = null;
         private string selectedFolderPath = "";
         private string pdfOutputFolder = "";
@@ -43,22 +43,155 @@ namespace AllAutoOfficePDF2
         private void InitializeDataBindings()
         {
             dgFiles.ItemsSource = fileItems;
-            lstProjects.ItemsSource = projects;
+            treeProjects.ItemsSource = categoryGroups;
         }
 
         private void LoadProjects()
         {
-            projects.Clear();
+            categoryGroups.Clear();
             var projectList = ProjectManager.LoadProjects();
+            
+            // 既存プロジェクトのアイコンを修正
+            FixExistingProjectIcons(projectList);
+            
+            // 各プロジェクトのアイコンを確認・設定
             foreach (var project in projectList)
             {
-                projects.Add(project);
+                if (string.IsNullOrEmpty(project.CategoryIcon))
+                {
+                    project.CategoryIcon = GetDefaultCategoryIcon(project.Category);
+                }
             }
+            
+            // カテゴリ別にグループ化
+            var groupedProjects = projectList.GroupBy(p => string.IsNullOrEmpty(p.Category) ? "未分類" : p.Category)
+                                            .OrderBy(g => g.Key == "未分類" ? "z" : g.Key)
+                                            .ToList();
+
+            foreach (var group in groupedProjects)
+            {
+                var categoryGroup = new ProjectCategoryGroup
+                {
+                    CategoryName = group.Key,
+                    CategoryIcon = GetCategoryIcon(group.Key, group.First().CategoryIcon),
+                    CategoryColor = GetCategoryColor(group.Key, group.First().CategoryColor)
+                };
+
+                // カテゴリ内でプロジェクト名順に並び替え
+                var sortedProjects = group.OrderBy(p => p.Name).ToList();
+                foreach (var project in sortedProjects)
+                {
+                    categoryGroup.Projects.Add(project);
+                }
+
+                categoryGroups.Add(categoryGroup);
+            }
+        }
+
+        /// <summary>
+        /// 既存プロジェクトのアイコンを修正
+        /// </summary>
+        private void FixExistingProjectIcons(List<ProjectData> projects)
+        {
+            bool needsSave = false;
+            
+            foreach (var project in projects)
+            {
+                // 空のアイコンやデフォルト値の修正
+                if (string.IsNullOrEmpty(project.CategoryIcon) || project.CategoryIcon == "??")
+                {
+                    project.CategoryIcon = GetDefaultCategoryIcon(project.Category);
+                    needsSave = true;
+                }
+                
+                // 空の色やデフォルト値の修正
+                if (string.IsNullOrEmpty(project.CategoryColor))
+                {
+                    project.CategoryColor = GetCategoryColor(project.Category, "");
+                    needsSave = true;
+                }
+            }
+            
+            // 修正があった場合は保存
+            if (needsSave)
+            {
+                ProjectManager.SaveProjects(projects);
+            }
+        }
+
+        private string GetDefaultCategoryIcon(string category)
+        {
+            return category switch
+            {
+                "業務" => "💼",
+                "プロジェクト" => "📊",
+                "資料" => "📋",
+                "マニュアル" => "📖",
+                "提案書" => "📝",
+                "報告書" => "📄",
+                "会議" => "🗣️",
+                "設計" => "⚙️",
+                "テスト" => "🧪",
+                "開発" => "💻",
+                "運用" => "🔧",
+                "保守" => "🛠️",
+                "バックアップ" => "💾",
+                "アーカイブ" => "📦",
+                "一時的" => "⏱️",
+                "進行中" => "🔄",
+                "完了" => "✅",
+                "保留" => "⏸️",
+                "重要" => "⭐",
+                "緊急" => "🚨",
+                _ => "📁"
+            };
+        }
+
+        private string GetCategoryIcon(string categoryName, string existingIcon)
+        {
+            if (!string.IsNullOrEmpty(existingIcon) && existingIcon != "📁")
+            {
+                return existingIcon;
+            }
+            return GetDefaultCategoryIcon(categoryName);
+        }
+
+        private string GetCategoryColor(string categoryName, string existingColor)
+        {
+            if (!string.IsNullOrEmpty(existingColor) && existingColor != "#E9ECEF")
+            {
+                return existingColor;
+            }
+            
+            return categoryName switch
+            {
+                "業務" => "#007ACC",
+                "プロジェクト" => "#28A745",
+                "資料" => "#6C757D",
+                "マニュアル" => "#17A2B8",
+                "提案書" => "#FFC107",
+                "報告書" => "#DC3545",
+                "会議" => "#6F42C1",
+                "設計" => "#FD7E14",
+                "テスト" => "#20C997",
+                "開発" => "#E83E8C",
+                "運用" => "#6C757D",
+                "保守" => "#495057",
+                "バックアップ" => "#ADB5BD",
+                "アーカイブ" => "#868E96",
+                "一時的" => "#F8F9FA",
+                "進行中" => "#007BFF",
+                "完了" => "#28A745",
+                "保留" => "#FFC107",
+                "重要" => "#FF6B6B",
+                "緊急" => "#DC3545",
+                _ => "#E9ECEF"
+            };
         }
 
         private void RestoreActiveProject()
         {
-            var activeProject = projects.FirstOrDefault(p => p.IsActive);
+            var activeProject = GetAllProjects().FirstOrDefault(p => p.IsActive);
             if (activeProject != null)
             {
                 SwitchToProject(activeProject);
@@ -67,6 +200,20 @@ namespace AllAutoOfficePDF2
             {
                 UpdateLatestMergedPdfDisplay();
             }
+        }
+
+        /// <summary>
+        /// 全プロジェクトを取得
+        /// </summary>
+        /// <returns>全プロジェクトのリスト</returns>
+        private List<ProjectData> GetAllProjects()
+        {
+            var allProjects = new List<ProjectData>();
+            foreach (var categoryGroup in categoryGroups)
+            {
+                allProjects.AddRange(categoryGroup.Projects);
+            }
+            return allProjects;
         }
         #endregion
 
@@ -80,27 +227,47 @@ namespace AllAutoOfficePDF2
                 {
                     Name = dialog.ProjectName,
                     FolderPath = dialog.FolderPath,
-                    PdfOutputFolder = Path.Combine(dialog.FolderPath, "PDF")
+                    Category = dialog.Category,
+                    IncludeSubfolders = dialog.IncludeSubfolders,
+                    UseCustomPdfPath = dialog.UseCustomPdfPath,
+                    CustomPdfPath = dialog.CustomPdfPath,
+                    CategoryIcon = GetDefaultCategoryIcon(dialog.Category),
+                    CategoryColor = GetCategoryColor(dialog.Category, "")
                 };
 
-                projects.Add(newProject);
+                // カテゴリグループに追加
+                AddProjectToCategoryGroup(newProject);
                 SwitchToProject(newProject);
+                
+                // プロジェクトリストを再構築
+                RefreshProjectList();
             }
         }
 
         private void BtnEditProject_Click(object sender, RoutedEventArgs e)
         {
-            if (lstProjects.SelectedItem is ProjectData selectedProject)
+            if (treeProjects.SelectedItem is ProjectData selectedProject)
             {
                 var dialog = new ProjectEditDialog();
                 dialog.ProjectName = selectedProject.Name;
                 dialog.FolderPath = selectedProject.FolderPath;
+                dialog.Category = selectedProject.Category;
+                dialog.IncludeSubfolders = selectedProject.IncludeSubfolders;
+                dialog.UseCustomPdfPath = selectedProject.UseCustomPdfPath;
+                dialog.CustomPdfPath = selectedProject.CustomPdfPath;
 
                 if (dialog.ShowDialog() == true)
                 {
                     selectedProject.Name = dialog.ProjectName;
                     selectedProject.FolderPath = dialog.FolderPath;
-                    selectedProject.PdfOutputFolder = Path.Combine(dialog.FolderPath, "PDF");
+                    selectedProject.Category = dialog.Category;
+                    selectedProject.IncludeSubfolders = dialog.IncludeSubfolders;
+                    selectedProject.UseCustomPdfPath = dialog.UseCustomPdfPath;
+                    selectedProject.CustomPdfPath = dialog.CustomPdfPath;
+                    
+                    // カテゴリが変更された場合、アイコンと色を更新
+                    selectedProject.CategoryIcon = GetDefaultCategoryIcon(dialog.Category);
+                    selectedProject.CategoryColor = GetCategoryColor(dialog.Category, "");
 
                     if (selectedProject == currentProject)
                     {
@@ -111,20 +278,27 @@ namespace AllAutoOfficePDF2
                     }
 
                     SaveProjects();
+                    RefreshProjectList();
                 }
+            }
+            else
+            {
+                MessageBox.Show("編集するプロジェクトを選択してください。", "情報", 
+                    MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
         private void BtnDeleteProject_Click(object sender, RoutedEventArgs e)
         {
-            if (lstProjects.SelectedItem is ProjectData selectedProject)
+            if (treeProjects.SelectedItem is ProjectData selectedProject)
             {
                 var result = MessageBox.Show($"プロジェクト '{selectedProject.Name}' を削除しますか？",
                     "確認", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
                 if (result == MessageBoxResult.Yes)
                 {
-                    projects.Remove(selectedProject);
+                    // カテゴリグループから削除
+                    RemoveProjectFromCategoryGroup(selectedProject);
 
                     if (selectedProject == currentProject)
                     {
@@ -139,19 +313,29 @@ namespace AllAutoOfficePDF2
                     SaveProjects();
                 }
             }
+            else
+            {
+                MessageBox.Show("削除するプロジェクトを選択してください。", "情報", 
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+            }
         }
 
         private void BtnSwitchProject_Click(object sender, RoutedEventArgs e)
         {
-            if (lstProjects.SelectedItem is ProjectData selectedProject)
+            if (treeProjects.SelectedItem is ProjectData selectedProject)
             {
                 SwitchToProject(selectedProject);
             }
+            else
+            {
+                MessageBox.Show("プロジェクトを選択してください。", "情報", 
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+            }
         }
 
-        private void LstProjects_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private void TreeProjects_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            if (lstProjects.SelectedItem is ProjectData selectedProject)
+            if (treeProjects.SelectedItem is ProjectData selectedProject)
             {
                 SwitchToProject(selectedProject);
             }
@@ -177,9 +361,14 @@ namespace AllAutoOfficePDF2
                 {
                     Name = dialog.ProjectName,
                     FolderPath = dialog.FolderPath,
-                    PdfOutputFolder = Path.Combine(dialog.FolderPath, "PDF"),
+                    Category = dialog.Category,
+                    IncludeSubfolders = dialog.IncludeSubfolders,
+                    UseCustomPdfPath = dialog.UseCustomPdfPath,
+                    CustomPdfPath = dialog.CustomPdfPath,
                     MergeFileName = txtMergeFileName.Text,
-                    AddPageNumber = chkAddPageNumber.IsChecked ?? false
+                    AddPageNumber = chkAddPageNumber.IsChecked ?? false,
+                    CategoryIcon = GetDefaultCategoryIcon(dialog.Category),
+                    CategoryColor = GetCategoryColor(dialog.Category, "")
                 };
 
                 // 現在のファイル状態を保存
@@ -191,11 +380,12 @@ namespace AllAutoOfficePDF2
                         TargetPages = item.TargetPages,
                         FilePath = item.FilePath,
                         LastModified = item.LastModified,
-                        DisplayOrder = item.DisplayOrder
+                        DisplayOrder = item.DisplayOrder,
+                        RelativePath = item.RelativePath
                     });
                 }
 
-                projects.Add(newProject);
+                AddProjectToCategoryGroup(newProject);
                 SwitchToProject(newProject);
 
                 MessageBox.Show($"プロジェクト '{newProject.Name}' を作成しました。", "完了",
@@ -208,7 +398,7 @@ namespace AllAutoOfficePDF2
             SaveCurrentProjectState();
 
             // 全プロジェクトのアクティブ状態をリセット
-            foreach (var p in projects)
+            foreach (var p in GetAllProjects())
             {
                 p.IsActive = false;
             }
@@ -232,7 +422,8 @@ namespace AllAutoOfficePDF2
 
         private void SaveProjects()
         {
-            ProjectManager.SaveProjects(projects.ToList());
+            var allProjects = GetAllProjects();
+            ProjectManager.SaveProjects(allProjects);
         }
 
         private void SaveCurrentProjectState()
@@ -255,7 +446,8 @@ namespace AllAutoOfficePDF2
                         TargetPages = item.TargetPages,
                         FilePath = item.FilePath,
                         LastModified = item.LastModified,
-                        DisplayOrder = item.DisplayOrder
+                        DisplayOrder = item.DisplayOrder,
+                        RelativePath = item.RelativePath
                     });
                 }
 
@@ -276,6 +468,139 @@ namespace AllAutoOfficePDF2
                 Title = "AllAutoOfficePDF2";
             }
         }
+
+        /// <summary>
+        /// プロジェクトリストをカテゴリ順序で再構築
+        /// </summary>
+        private void RefreshProjectList()
+        {
+            var currentSelectedProject = treeProjects.SelectedItem as ProjectData;
+            
+            // カテゴリグループをクリアして再構築
+            LoadProjects();
+            
+            // 選択状態を復元
+            if (currentSelectedProject != null)
+            {
+                SelectProjectInTree(currentSelectedProject.Id);
+            }
+        }
+
+        /// <summary>
+        /// TreeViewで指定IDのプロジェクトを選択
+        /// </summary>
+        private void SelectProjectInTree(string projectId)
+        {
+            foreach (var categoryGroup in categoryGroups)
+            {
+                var project = categoryGroup.Projects.FirstOrDefault(p => p.Id == projectId);
+                if (project != null)
+                {
+                    // TreeViewItemを見つけて選択
+                    var treeViewItem = FindTreeViewItem(treeProjects, project);
+                    if (treeViewItem != null)
+                    {
+                        treeViewItem.IsSelected = true;
+                    }
+                    break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// TreeViewItemを検索
+        /// </summary>
+        private TreeViewItem FindTreeViewItem(System.Windows.Controls.TreeView treeView, object item)
+        {
+            return FindTreeViewItem(treeView, item, treeView.ItemContainerGenerator);
+        }
+
+        /// <summary>
+        /// TreeViewItemを再帰的に検索
+        /// </summary>
+        private TreeViewItem FindTreeViewItem(ItemsControl parent, object item, ItemContainerGenerator generator)
+        {
+            if (parent == null || item == null) return null;
+
+            for (int i = 0; i < parent.Items.Count; i++)
+            {
+                var container = generator.ContainerFromIndex(i) as TreeViewItem;
+                if (container != null)
+                {
+                    if (container.DataContext == item)
+                        return container;
+
+                    var child = FindTreeViewItem(container, item, container.ItemContainerGenerator);
+                    if (child != null)
+                        return child;
+                }
+            }
+            return null;
+        }
+
+        private void BtnCategoryManage_Click(object sender, RoutedEventArgs e)
+        {
+            var allProjects = GetAllProjects();
+            var categories = ProjectManager.GetAvailableCategories(allProjects);
+            var categoryList = string.Join("\n", categories.Select((c, i) => $"{i + 1}. {c}"));
+            
+            var message = "現在のカテゴリ一覧:\n\n";
+            if (categories.Any())
+            {
+                message += categoryList;
+            }
+            else
+            {
+                message += "カテゴリはまだ設定されていません。";
+            }
+            
+            message += "\n\nプロジェクト編集画面でカテゴリを設定・変更できます。";
+            
+            MessageBox.Show(message, "カテゴリ管理", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        /// <summary>
+        /// プロジェクトをカテゴリグループに追加
+        /// </summary>
+        private void AddProjectToCategoryGroup(ProjectData project)
+        {
+            var categoryName = string.IsNullOrEmpty(project.Category) ? "未分類" : project.Category;
+            var existingGroup = categoryGroups.FirstOrDefault(g => g.CategoryName == categoryName);
+            
+            if (existingGroup == null)
+            {
+                existingGroup = new ProjectCategoryGroup
+                {
+                    CategoryName = categoryName,
+                    CategoryIcon = GetCategoryIcon(categoryName, project.CategoryIcon),
+                    CategoryColor = GetCategoryColor(categoryName, project.CategoryColor)
+                };
+                categoryGroups.Add(existingGroup);
+            }
+            
+            existingGroup.Projects.Add(project);
+        }
+
+        /// <summary>
+        /// プロジェクトをカテゴリグループから削除
+        /// </summary>
+        private void RemoveProjectFromCategoryGroup(ProjectData project)
+        {
+            foreach (var categoryGroup in categoryGroups.ToList())
+            {
+                if (categoryGroup.Projects.Contains(project))
+                {
+                    categoryGroup.Projects.Remove(project);
+                    
+                    // プロジェクトが空になったカテゴリグループは削除
+                    if (categoryGroup.Projects.Count == 0)
+                    {
+                        categoryGroups.Remove(categoryGroup);
+                    }
+                    break;
+                }
+            }
+        }
         #endregion
 
         #region ファイル管理
@@ -283,17 +608,27 @@ namespace AllAutoOfficePDF2
         {
             using (var dialog = new System.Windows.Forms.FolderBrowserDialog())
             {
-                dialog.Description = "対象フォルダを選択してください";
+                dialog.Description = "対象フォルダを選択してください（フォルダパスのみが設定されます）";
                 if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
+                    // フォルダパスのみを設定（ファイル名は含めない）
                     selectedFolderPath = dialog.SelectedPath;
                     txtFolderPath.Text = selectedFolderPath;
-                    pdfOutputFolder = Path.Combine(selectedFolderPath, "PDF");
+                    
+                    // PDFアウトプットフォルダもフォルダパスのみに設定
+                    if (currentProject != null && currentProject.UseCustomPdfPath && !string.IsNullOrEmpty(currentProject.CustomPdfPath))
+                    {
+                        pdfOutputFolder = currentProject.CustomPdfPath;
+                    }
+                    else
+                    {
+                        pdfOutputFolder = Path.Combine(selectedFolderPath, "PDF");
+                    }
                     
                     if (currentProject != null)
                     {
                         currentProject.FolderPath = selectedFolderPath;
-                        currentProject.PdfOutputFolder = pdfOutputFolder;
+                        // PdfOutputFolderはプロパティで自動計算されるので直接設定しない
                         SaveProjects();
                     }
                     
@@ -310,7 +645,8 @@ namespace AllAutoOfficePDF2
                 return;
             }
 
-            var loadedFileItems = FileManagementService.LoadFilesFromFolder(selectedFolderPath, pdfOutputFolder);
+            var includeSubfolders = currentProject?.IncludeSubfolders ?? false;
+            var loadedFileItems = FileManagementService.LoadFilesFromFolder(selectedFolderPath, pdfOutputFolder, includeSubfolders);
             
             fileItems.Clear();
             for (int i = 0; i < loadedFileItems.Count; i++)
@@ -320,7 +656,12 @@ namespace AllAutoOfficePDF2
                 fileItems.Add(loadedFileItems[i]);
             }
 
-            txtStatus.Text = $"{fileItems.Count}個のファイルを読み込みました";
+            var statusMessage = $"{fileItems.Count}個のファイルを読み込みました";
+            if (includeSubfolders)
+            {
+                statusMessage += " (サブフォルダを含む)";
+            }
+            txtStatus.Text = statusMessage;
             SaveCurrentProjectState();
         }
 
@@ -332,8 +673,9 @@ namespace AllAutoOfficePDF2
                 return;
             }
 
+            var includeSubfolders = currentProject?.IncludeSubfolders ?? false;
             var (updatedItems, changedFiles, addedFiles, deletedFiles) = 
-                FileManagementService.UpdateFiles(selectedFolderPath, pdfOutputFolder, fileItems.ToList());
+                FileManagementService.UpdateFiles(selectedFolderPath, pdfOutputFolder, fileItems.ToList(), includeSubfolders);
 
             fileItems.Clear();
             foreach (var item in updatedItems)
@@ -344,6 +686,11 @@ namespace AllAutoOfficePDF2
             // 結果メッセージを作成
             var statusMessages = new List<string>();
             statusMessages.Add($"{fileItems.Count}個のファイルを更新しました");
+            
+            if (includeSubfolders)
+            {
+                statusMessages.Add("(サブフォルダを含む)");
+            }
 
             if (changedFiles.Any())
                 statusMessages.Add($"変更されたファイル: {changedFiles.Count}個");
@@ -377,7 +724,7 @@ namespace AllAutoOfficePDF2
                 return;
             }
 
-            var loadedFileItems = FileManagementService.LoadFilesFromFolder(project.FolderPath, project.PdfOutputFolder);
+            var loadedFileItems = FileManagementService.LoadFilesFromFolder(project.FolderPath, project.PdfOutputFolder, project.IncludeSubfolders);
             
             // 保存された状態を復元
             foreach (var item in loadedFileItems)
@@ -394,6 +741,7 @@ namespace AllAutoOfficePDF2
             // 表示順序で並び替え
             var orderedItems = loadedFileItems
                 .OrderBy(f => f.DisplayOrder)
+                .ThenBy(f => f.RelativePath)
                 .ThenBy(f => f.FileName)
                 .ToList();
 
@@ -404,7 +752,12 @@ namespace AllAutoOfficePDF2
                 fileItems.Add(orderedItems[i]);
             }
 
-            txtStatus.Text = $"プロジェクト '{project.Name}' を読み込みました ({fileItems.Count}個のファイル)";
+            var statusMessage = $"プロジェクト '{project.Name}' を読み込みました ({fileItems.Count}個のファイル)";
+            if (project.IncludeSubfolders)
+            {
+                statusMessage += " (サブフォルダを含む)";
+            }
+            txtStatus.Text = statusMessage;
         }
         #endregion
 
@@ -521,6 +874,9 @@ namespace AllAutoOfficePDF2
             if (!Directory.Exists(pdfOutputFolder))
                 Directory.CreateDirectory(pdfOutputFolder);
 
+            var includeSubfolders = currentProject?.IncludeSubfolders ?? false;
+            var baseFolderPath = selectedFolderPath;
+
             progressBar.Visibility = Visibility.Visible;
             progressBar.Maximum = selectedFiles.Count;
             progressBar.Value = 0;
@@ -531,7 +887,13 @@ namespace AllAutoOfficePDF2
                 {
                     try
                     {
-                        PdfConversionService.ConvertToPdf(file.FilePath, pdfOutputFolder, file.TargetPages);
+                        // サブフォルダ構造を考慮した変換
+                        if (includeSubfolders)
+                        {
+                            FileManagementService.EnsurePdfOutputDirectory(file.FilePath, pdfOutputFolder, baseFolderPath, includeSubfolders);
+                        }
+
+                        PdfConversionService.ConvertToPdf(file.FilePath, pdfOutputFolder, file.TargetPages, baseFolderPath, includeSubfolders);
 
                         Dispatcher.Invoke(() =>
                         {
@@ -568,12 +930,31 @@ namespace AllAutoOfficePDF2
             // PDFファイルパスを取得
             var pdfFilePaths = new List<string>();
             var missingPdfFiles = new List<string>();
+            var includeSubfolders = currentProject?.IncludeSubfolders ?? false;
+            var baseFolderPath = selectedFolderPath;
 
             foreach (var file in allFiles)
             {
-                string pdfPath = file.Extension.ToLower() == "pdf" 
-                    ? file.FilePath 
-                    : Path.Combine(pdfOutputFolder, Path.GetFileNameWithoutExtension(file.FileName) + ".pdf");
+                string pdfPath;
+                if (file.Extension.ToLower() == "pdf")
+                {
+                    pdfPath = file.FilePath;
+                }
+                else
+                {
+                    if (includeSubfolders)
+                    {
+                        // サブフォルダ構造を考慮したパス
+                        var fileInfo = new FileInfo(file.FilePath);
+                        var relativePath = GetRelativePath(baseFolderPath, fileInfo.DirectoryName!);
+                        var outputDir = Path.Combine(pdfOutputFolder, relativePath);
+                        pdfPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(file.FileName) + ".pdf");
+                    }
+                    else
+                    {
+                        pdfPath = Path.Combine(pdfOutputFolder, Path.GetFileNameWithoutExtension(file.FileName) + ".pdf");
+                    }
+                }
 
                 if (File.Exists(pdfPath))
                 {
@@ -595,7 +976,9 @@ namespace AllAutoOfficePDF2
                 return;
             }
 
-            var mergeFolder = Path.Combine(selectedFolderPath, "mergePDF");
+            // mergePDFフォルダの場所を決定（カスタムPDF保存パスを考慮）
+            var mergeFolder = GetMergePdfFolderPath();
+            
             if (!Directory.Exists(mergeFolder))
                 Directory.CreateDirectory(mergeFolder);
 
@@ -761,16 +1144,60 @@ namespace AllAutoOfficePDF2
         #endregion
 
         #region イベントハンドラ
-        private void LstProjects_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void TreeProjects_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            // 選択されたプロジェクトの情報を更新
-            // 特別な処理が必要な場合はここに追加
+            if (e.NewValue is ProjectData selectedProject)
+            {
+                // プロジェクトが選択された場合の処理はここに追加
+                // 現在は何もしない（ダブルクリックで切り替え）
+            }
         }
 
         protected override void OnClosed(EventArgs e)
         {
             SaveCurrentProjectState();
             base.OnClosed(e);
+        }
+        #endregion
+
+        #region ヘルパーメソッド
+        /// <summary>
+        /// 相対パスを取得
+        /// </summary>
+        /// <param name="basePath">基準パス</param>
+        /// <param name="fullPath">完全パス</param>
+        /// <returns>相対パス</returns>
+        private string GetRelativePath(string basePath, string fullPath)
+        {
+            var baseUri = new Uri(basePath.EndsWith(Path.DirectorySeparatorChar.ToString()) ? basePath : basePath + Path.DirectorySeparatorChar);
+            var fullUri = new Uri(fullPath);
+            
+            if (baseUri.Scheme != fullUri.Scheme)
+            {
+                return fullPath;
+            }
+
+            var relativeUri = baseUri.MakeRelativeUri(fullUri);
+            var relativePath = Uri.UnescapeDataString(relativeUri.ToString());
+            
+            return relativePath.Replace('/', Path.DirectorySeparatorChar);
+        }
+
+        /// <summary>
+        /// mergePDFフォルダのパスを取得
+        /// </summary>
+        /// <returns>mergePDFフォルダのパス</returns>
+        private string GetMergePdfFolderPath()
+        {
+            if (currentProject != null)
+            {
+                return currentProject.MergePdfFolder;
+            }
+            else
+            {
+                // プロジェクトがない場合は従来通り
+                return Path.Combine(selectedFolderPath, "mergePDF");
+            }
         }
         #endregion
     }

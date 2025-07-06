@@ -3,9 +3,17 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AllAutoOfficePDF2.Converters"
+        xmlns:models="clr-namespace:AllAutoOfficePDF2.Models"
         mc:Ignorable="d"
         Title="AllAutoOfficePDF2" Height="700" Width="1200"
         WindowStartupLocation="CenterScreen">
+    
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <local:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+    </Window.Resources>
+    
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="300"/>
@@ -29,42 +37,60 @@
             </Border>
 
             <!-- プロジェクト一覧 -->
-            <ListBox x:Name="lstProjects" Grid.Row="1" Margin="10" 
-                     MouseDoubleClick="LstProjects_MouseDoubleClick"
-                     SelectionChanged="LstProjects_SelectionChanged">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <Grid Margin="5">
+            <TreeView x:Name="treeProjects" Grid.Row="1" Margin="10" 
+                      SelectedItemChanged="TreeProjects_SelectedItemChanged"
+                      MouseDoubleClick="TreeProjects_MouseDoubleClick">
+                <TreeView.Resources>
+                    <!-- カテゴリグループのスタイル -->
+                    <HierarchicalDataTemplate DataType="{x:Type models:ProjectCategoryGroup}" ItemsSource="{Binding Projects}">
+                        <Border Background="{Binding CategoryColor}" CornerRadius="5" Padding="8,4" Margin="0,2">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding CategoryIcon}" FontSize="12" Margin="0,0,5,0" 
+                                           FontFamily="Segoe UI Emoji, Segoe UI Symbol, Segoe UI, Arial"/>
+                                <TextBlock Text="{Binding CategoryName}" FontWeight="Bold" FontSize="12"/>
+                                <TextBlock Text="{Binding ProjectCount, StringFormat=' ({0})'}" FontSize="10" Foreground="Gray" Margin="3,0,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </HierarchicalDataTemplate>
+                    
+                    <!-- プロジェクトのスタイル -->
+                    <DataTemplate DataType="{x:Type models:ProjectData}">
+                        <Grid Margin="5,2">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
                             
-                            <TextBlock Grid.Row="0" Text="{Binding Name}" FontWeight="Bold" FontSize="13"/>
-                            <TextBlock Grid.Row="1" Text="{Binding FolderPath}" FontSize="10" Foreground="Gray" 
+                            <TextBlock Grid.Row="0" Text="{Binding Name}" FontWeight="Bold" FontSize="11"/>
+                            <TextBlock Grid.Row="1" Text="{Binding FolderPath}" FontSize="9" Foreground="Gray" 
                                        TextTrimming="CharacterEllipsis"/>
-                            <TextBlock Grid.Row="2" Text="{Binding LastAccessDate, StringFormat='最終アクセス: {0:yyyy/MM/dd HH:mm}'}" 
-                                       FontSize="9" Foreground="Gray"/>
+                            <StackPanel Grid.Row="2" Orientation="Horizontal">
+                                <TextBlock Text="{Binding LastAccessDate, StringFormat='最終アクセス: {0:MM/dd HH:mm}'}" 
+                                           FontSize="8" Foreground="Gray"/>
+                                <TextBlock Text=" | サブ" FontSize="8" Foreground="Green" 
+                                           Visibility="{Binding IncludeSubfolders, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                <TextBlock Text=" | カスタム" FontSize="8" Foreground="Blue" 
+                                           Visibility="{Binding UseCustomPdfPath, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                            </StackPanel>
                         </Grid>
                     </DataTemplate>
-                </ListBox.ItemTemplate>
-                <ListBox.ItemContainerStyle>
-                    <Style TargetType="ListBoxItem">
-                        <Setter Property="Padding" Value="5"/>
-                        <Setter Property="Margin" Value="0,2"/>
-                        <Setter Property="BorderBrush" Value="#E0E0E0"/>
-                        <Setter Property="BorderThickness" Value="1"/>
+                </TreeView.Resources>
+                
+                <TreeView.ItemContainerStyle>
+                    <Style TargetType="TreeViewItem">
+                        <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}"/>
+                        <Setter Property="Padding" Value="2"/>
+                        <Setter Property="Margin" Value="0,1"/>
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding IsActive}" Value="True">
                                 <Setter Property="Background" Value="#007ACC"/>
                                 <Setter Property="Foreground" Value="White"/>
-                                <Setter Property="BorderBrush" Value="#005A9B"/>
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
-                </ListBox.ItemContainerStyle>
-            </ListBox>
+                </TreeView.ItemContainerStyle>
+            </TreeView>
 
             <!-- 現在のプロジェクト表示 -->
             <Border Grid.Row="2" Background="#DEE2E6" Padding="10" Margin="10,0">
@@ -81,6 +107,9 @@
                         Click="BtnSwitchProject_Click"/>
                 <Button x:Name="btnEditProject" Content="プロジェクト編集" Height="30" Margin="0,2"
                         Click="BtnEditProject_Click"/>
+                <Button x:Name="btnCategoryManage" Content="📂 カテゴリ管理" Height="30" Margin="0,2"
+                        Background="#17A2B8" Foreground="White"
+                        Click="BtnCategoryManage_Click"/>
                 <Button x:Name="btnDeleteProject" Content="プロジェクト削除" Height="30" Margin="0,2"
                         Background="#DC3545" Foreground="White"
                         Click="BtnDeleteProject_Click"/>
@@ -158,7 +187,7 @@
                 <DataGrid.Columns>
                     <DataGridCheckBoxColumn Header="選択" Binding="{Binding IsSelected}" Width="50"/>
                     <DataGridTextColumn Header="No" Binding="{Binding Number}" Width="50" IsReadOnly="True"/>
-                    <DataGridHyperlinkColumn Header="ファイル名" Width="250" IsReadOnly="True">
+                    <DataGridHyperlinkColumn Header="ファイル名" Width="200" IsReadOnly="True">
                         <DataGridHyperlinkColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="Text" Value="{Binding FileName}"/>
@@ -169,6 +198,7 @@
                             </Style>
                         </DataGridHyperlinkColumn.ElementStyle>
                     </DataGridHyperlinkColumn>
+                    <DataGridTextColumn Header="フォルダ" Binding="{Binding RelativePath}" Width="150" IsReadOnly="True"/>
                     <DataGridTextColumn Header="拡張子" Binding="{Binding Extension}" Width="80" IsReadOnly="True"/>
                     <DataGridTextColumn Header="対象ページ" Binding="{Binding TargetPages}" Width="100" IsReadOnly="False">
                         <DataGridTextColumn.HeaderStyle>

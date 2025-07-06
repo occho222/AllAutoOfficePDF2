@@ -2,12 +2,20 @@
 <Window x:Class="AllAutoOfficePDF2.Views.ProjectEditDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="プロジェクト編集" Height="220" Width="500"
+        Title="プロジェクト編集" Height="450" Width="600"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         Loaded="Window_Loaded">
     <Grid Margin="15">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="15"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="15"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="15"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="15"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="15"/>
             <RowDefinition Height="Auto"/>
@@ -28,8 +36,20 @@
                      VerticalAlignment="Center" Height="25"/>
         </Grid>
 
-        <!-- Folder Path -->
+        <!-- Parent Project -->
         <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Label Content="カテゴリ:" Grid.Column="0" VerticalAlignment="Center"/>
+            <ComboBox x:Name="cmbCategory" Grid.Column="1" Margin="10,0,0,0" 
+                      VerticalAlignment="Center" Height="25" IsEditable="True"
+                      Text="{Binding Category, UpdateSourceTrigger=PropertyChanged}"/>
+        </Grid>
+
+        <!-- Folder Path -->
+        <Grid Grid.Row="4">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
@@ -42,13 +62,54 @@
                     Click="BtnSelectFolder_Click"/>
         </Grid>
 
+        <!-- Subfolder Options -->
+        <Grid Grid.Row="6">
+            <CheckBox x:Name="chkIncludeSubfolders" Content="サブフォルダを含む" 
+                      VerticalAlignment="Center" Checked="ChkIncludeSubfolders_Checked" 
+                      Unchecked="ChkIncludeSubfolders_Unchecked"/>
+        </Grid>
+
+        <!-- Custom PDF Path -->
+        <Grid Grid.Row="8">
+            <CheckBox x:Name="chkUseCustomPdfPath" Content="カスタムPDF保存パスを使用" 
+                      VerticalAlignment="Center" Checked="ChkUseCustomPdfPath_Checked" 
+                      Unchecked="ChkUseCustomPdfPath_Unchecked"/>
+        </Grid>
+
+        <!-- Custom PDF Path Input -->
+        <Grid Grid.Row="10" x:Name="gridCustomPdfPath" IsEnabled="False">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Label Content="PDF保存パス:" Grid.Column="0" VerticalAlignment="Center"/>
+            <TextBox x:Name="txtCustomPdfPath" Grid.Column="1" Margin="10,0,10,0" 
+                     VerticalAlignment="Center" Height="25" IsReadOnly="True"/>
+            <Button Content="参照" Grid.Column="2" Width="60" Height="25"
+                    Click="BtnSelectCustomPdfPath_Click"/>
+        </Grid>
+
         <!-- Description -->
-        <TextBlock Grid.Row="4" Text="プロジェクトフォルダ内のOfficeファイルとPDFファイルが処理対象になります。" 
-                   TextWrapping="Wrap" FontSize="11" Foreground="Gray" 
-                   VerticalAlignment="Top"/>
+        <ScrollViewer Grid.Row="12" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <TextBlock Text="・プロジェクトフォルダ内のOfficeファイルとPDFファイルが処理対象になります。" 
+                           TextWrapping="Wrap" FontSize="11" Foreground="Gray" Margin="0,0,0,5"/>
+                <TextBlock Text="・カテゴリを設定すると、プロジェクトを整理して管理できます。" 
+                           TextWrapping="Wrap" FontSize="11" Foreground="Gray" Margin="0,0,0,5"/>
+                <TextBlock Text="・サブフォルダを含むを選択すると、フォルダ内のすべてのサブフォルダからファイルを読み込みます。" 
+                           TextWrapping="Wrap" FontSize="11" Foreground="Gray" Margin="0,0,0,5"/>
+                <TextBlock Text="・サブフォルダを含む場合、カスタムPDF保存パスの設定が必須です。" 
+                           TextWrapping="Wrap" FontSize="11" Foreground="Red" FontWeight="Bold" Margin="0,0,0,5"/>
+                <TextBlock Text="・カスタムPDF保存パスはフォルダパスのみを指定します（ファイル名は含めません）。" 
+                           TextWrapping="Wrap" FontSize="11" Foreground="Blue" FontWeight="Bold" Margin="0,0,0,5"/>
+                <TextBlock Text="・サブフォルダを含む場合、PDF保存時にサブフォルダ構造も維持されます。" 
+                           TextWrapping="Wrap" FontSize="11" Foreground="Gray" Margin="0,0,0,5"/>
+            </StackPanel>
+        </ScrollViewer>
 
         <!-- Buttons -->
-        <StackPanel Grid.Row="6" Orientation="Horizontal" HorizontalAlignment="Right">
+        <StackPanel Grid.Row="14" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button x:Name="btnOK" Content="OK" Width="80" Height="30" Margin="0,0,10,0"
                     Click="BtnOK_Click" IsDefault="True"/>
             <Button x:Name="btnCancel" Content="キャンセル" Width="80" Height="30"

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Text.Json.Serialization;
 
 namespace AllAutoOfficePDF2.Models
@@ -13,6 +14,9 @@ namespace AllAutoOfficePDF2.Models
     {
         private string _name = "";
         private bool _isActive = false;
+        private bool _includeSubfolders = false;
+        private bool _useCustomPdfPath = false;
+        private string _customPdfPath = "";
 
         /// <summary>
         /// プロジェクトID
@@ -33,6 +37,11 @@ namespace AllAutoOfficePDF2.Models
         }
 
         /// <summary>
+        /// プロジェクトの階層レベル
+        /// </summary>
+        public int Level { get; set; } = 0;
+
+        /// <summary>
         /// アクティブ状態
         /// </summary>
         public bool IsActive
@@ -51,9 +60,85 @@ namespace AllAutoOfficePDF2.Models
         public string FolderPath { get; set; } = "";
 
         /// <summary>
+        /// サブフォルダを含むかどうか
+        /// </summary>
+        public bool IncludeSubfolders
+        {
+            get => _includeSubfolders;
+            set
+            {
+                _includeSubfolders = value;
+                OnPropertyChanged(nameof(IncludeSubfolders));
+            }
+        }
+
+        /// <summary>
+        /// カスタムPDF保存パスを使用するかどうか
+        /// </summary>
+        public bool UseCustomPdfPath
+        {
+            get => _useCustomPdfPath;
+            set
+            {
+                _useCustomPdfPath = value;
+                OnPropertyChanged(nameof(UseCustomPdfPath));
+            }
+        }
+
+        /// <summary>
+        /// カスタムPDF保存パス
+        /// </summary>
+        public string CustomPdfPath
+        {
+            get => _customPdfPath;
+            set
+            {
+                _customPdfPath = value;
+                OnPropertyChanged(nameof(CustomPdfPath));
+            }
+        }
+
+        /// <summary>
         /// PDF出力フォルダのパス
         /// </summary>
-        public string PdfOutputFolder { get; set; } = "";
+        public string PdfOutputFolder 
+        { 
+            get 
+            {
+                if (UseCustomPdfPath && !string.IsNullOrEmpty(CustomPdfPath))
+                {
+                    // カスタムパスを使用する場合、PDFフォルダを作成
+                    return Path.Combine(CustomPdfPath, "PDF");
+                }
+                return Path.Combine(FolderPath, "PDF");
+            }
+            set
+            {
+                // 後方互換性のため、setter は保持
+                if (!UseCustomPdfPath)
+                {
+                    // 従来通りの動作
+                }
+            }
+        }
+
+        /// <summary>
+        /// 結合PDF保存フォルダのパス
+        /// </summary>
+        [JsonIgnore]
+        public string MergePdfFolder
+        {
+            get
+            {
+                if (UseCustomPdfPath && !string.IsNullOrEmpty(CustomPdfPath))
+                {
+                    // カスタムパスを使用する場合、カスタムパス下にmergePDFフォルダを作成
+                    return Path.Combine(CustomPdfPath, "mergePDF");
+                }
+                // 通常はプロジェクトフォルダ下にmergePDFフォルダを作成
+                return Path.Combine(FolderPath, "mergePDF");
+            }
+        }
 
         /// <summary>
         /// 結合PDFファイル名
@@ -86,10 +171,36 @@ namespace AllAutoOfficePDF2.Models
         public List<FileItemData> FileItems { get; set; } = new List<FileItemData>();
 
         /// <summary>
+        /// プロジェクトカテゴリ（フォルダ分け用）
+        /// </summary>
+        public string Category { get; set; } = "";
+
+        /// <summary>
+        /// カテゴリの説明
+        /// </summary>
+        public string CategoryDescription { get; set; } = "";
+
+        /// <summary>
+        /// カテゴリの色（表示用）
+        /// </summary>
+        public string CategoryColor { get; set; } = "#E9ECEF";
+
+        /// <summary>
+        /// カテゴリアイコン（表示用）
+        /// </summary>
+        public string CategoryIcon { get; set; } = "??";
+
+        /// <summary>
         /// 表示名（JSON非対象）
         /// </summary>
         [JsonIgnore]
-        public string DisplayName => $"{Name} ({Path.GetFileName(FolderPath)})";
+        public string DisplayName => string.IsNullOrEmpty(Category) ? Name : $"{Name}";
+
+        /// <summary>
+        /// カテゴリ付き表示名（JSON非対象）
+        /// </summary>
+        [JsonIgnore]
+        public string CategoryDisplayName => string.IsNullOrEmpty(Category) ? $"?? {Name}" : $"{CategoryIcon} {Name}";
 
         /// <summary>
         /// プロパティ変更イベント

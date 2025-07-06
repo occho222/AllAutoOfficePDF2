@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AllAutoOfficePDF2")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b2dd16f57bc376719c87457c6980fa007cec90d5")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a22a82a02207e6eaf6d93ac000253d33265f9dfc")]
 [assembly: System.Reflection.AssemblyProductAttribute("AllAutoOfficePDF2")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AllAutoOfficePDF2")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

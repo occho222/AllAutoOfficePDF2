@@ -32,3 +32,5 @@ C:\github\AllAutoOfficePDF2\AllAutoOfficePDF2\obj\x64\Debug\net6.0-windows\Views
 C:\github\AllAutoOfficePDF2\AllAutoOfficePDF2\obj\x64\Debug\net6.0-windows\Views\ProjectEditDialog.baml
 C:\github\AllAutoOfficePDF2\AllAutoOfficePDF2\obj\x64\Debug\net6.0-windows\Views\MainWindow.g.cs
 C:\github\AllAutoOfficePDF2\AllAutoOfficePDF2\obj\x64\Debug\net6.0-windows\Views\ProjectEditDialog.g.cs
+C:\github\AllAutoOfficePDF2\AllAutoOfficePDF2\obj\x64\Debug\net6.0-windows\GeneratedInternalTypeHelper.g.cs
+C:\github\AllAutoOfficePDF2\AllAutoOfficePDF2\obj\x64\Debug\net6.0-windows\AllAutoOfficePDF2_MarkupCompile.lref

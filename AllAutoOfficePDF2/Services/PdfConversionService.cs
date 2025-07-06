@@ -23,10 +23,33 @@ namespace AllAutoOfficePDF2.Services
         /// <param name="filePath">変換元ファイルパス</param>
         /// <param name="pdfOutputFolder">PDF出力フォルダ</param>
         /// <param name="targetPages">対象ページ</param>
-        public static void ConvertToPdf(string filePath, string pdfOutputFolder, string targetPages = "")
+        /// <param name="baseFolderPath">基準フォルダパス（サブフォルダ構造維持用）</param>
+        /// <param name="maintainSubfolderStructure">サブフォルダ構造を維持するかどうか</param>
+        public static void ConvertToPdf(string filePath, string pdfOutputFolder, string targetPages = "", 
+            string baseFolderPath = "", bool maintainSubfolderStructure = false)
         {
             var extension = Path.GetExtension(filePath).ToLower();
-            var outputPath = Path.Combine(pdfOutputFolder, Path.GetFileNameWithoutExtension(filePath) + ".pdf");
+            
+            string outputPath;
+            if (maintainSubfolderStructure && !string.IsNullOrEmpty(baseFolderPath))
+            {
+                // サブフォルダ構造を維持
+                var fileInfo = new FileInfo(filePath);
+                var relativePath = GetRelativePath(baseFolderPath, fileInfo.DirectoryName!);
+                var outputDir = Path.Combine(pdfOutputFolder, relativePath);
+                
+                if (!Directory.Exists(outputDir))
+                {
+                    Directory.CreateDirectory(outputDir);
+                }
+                
+                outputPath = Path.Combine(outputDir, Path.GetFileNameWithoutExtension(filePath) + ".pdf");
+            }
+            else
+            {
+                // 従来通り、すべて同じフォルダに出力
+                outputPath = Path.Combine(pdfOutputFolder, Path.GetFileNameWithoutExtension(filePath) + ".pdf");
+            }
 
             switch (extension)
             {
@@ -49,6 +72,17 @@ namespace AllAutoOfficePDF2.Services
                         File.Copy(filePath, outputPath, overwrite: false);
                     break;
             }
+        }
+
+        /// <summary>
+        /// Office文書をPDFに変換（従来の互換性メソッド）
+        /// </summary>
+        /// <param name="filePath">変換元ファイルパス</param>
+        /// <param name="pdfOutputFolder">PDF出力フォルダ</param>
+        /// <param name="targetPages">対象ページ</param>
+        public static void ConvertToPdf(string filePath, string pdfOutputFolder, string targetPages = "")
+        {
+            ConvertToPdf(filePath, pdfOutputFolder, targetPages, "", false);
         }
 
         /// <summary>
@@ -187,7 +221,18 @@ namespace AllAutoOfficePDF2.Services
 
             try
             {
-                pptApp = Activator.CreateInstance(Type.GetTypeFromProgID("PowerPoint.Application"));
+                var pptType = Type.GetTypeFromProgID("PowerPoint.Application");
+                if (pptType == null)
+                {
+                    throw new InvalidOperationException("PowerPointアプリケーションが見つかりません。");
+                }
+                
+                pptApp = Activator.CreateInstance(pptType);
+                if (pptApp == null)
+                {
+                    throw new InvalidOperationException("PowerPointアプリケーションを起動できませんでした。");
+                }
+                
                 presentation = pptApp.Presentations.Open(inputPath);
 
                 var targetSlides = ParsePageRange(targetPages);
@@ -344,6 +389,28 @@ namespace AllAutoOfficePDF2.Services
             }
             GC.Collect();
             GC.WaitForPendingFinalizers();
+        }
+
+        /// <summary>
+        /// 相対パスを取得
+        /// </summary>
+        /// <param name="basePath">基準パス</param>
+        /// <param name="fullPath">完全パス</param>
+        /// <returns>相対パス</returns>
+        private static string GetRelativePath(string basePath, string fullPath)
+        {
+            var baseUri = new Uri(basePath.EndsWith(Path.DirectorySeparatorChar.ToString()) ? basePath : basePath + Path.DirectorySeparatorChar);
+            var fullUri = new Uri(fullPath);
+            
+            if (baseUri.Scheme != fullUri.Scheme)
+            {
+                return fullPath;
+            }
+
+            var relativeUri = baseUri.MakeRelativeUri(fullUri);
+            var relativePath = Uri.UnescapeDataString(relativeUri.ToString());
+            
+            return relativePath.Replace('/', Path.DirectorySeparatorChar);
         }
     }
 }

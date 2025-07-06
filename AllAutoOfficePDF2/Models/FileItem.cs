@@ -82,6 +82,11 @@ namespace AllAutoOfficePDF2.Models
         public int DisplayOrder { get; set; } = 0;
 
         /// <summary>
+        /// 相対パス（サブフォルダ読み込み用）
+        /// </summary>
+        public string RelativePath { get; set; } = "";
+
+        /// <summary>
         /// プロパティ変更イベント
         /// </summary>
         public event PropertyChangedEventHandler? PropertyChanged;

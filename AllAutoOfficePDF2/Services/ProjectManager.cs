@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using AllAutoOfficePDF2.Models;
 
@@ -63,6 +64,56 @@ namespace AllAutoOfficePDF2.Services
                 System.Windows.MessageBox.Show($"プロジェクトの保存に失敗しました: {ex.Message}", "エラー",
                     System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
             }
+        }
+
+        /// <summary>
+        /// カテゴリ別のプロジェクト表示順序を取得
+        /// </summary>
+        /// <param name="projects">プロジェクトリスト</param>
+        /// <returns>カテゴリ別に整理されたプロジェクトリスト</returns>
+        public static List<ProjectData> GetProjectsByCategoryOrder(List<ProjectData> projects)
+        {
+            var result = new List<ProjectData>();
+            
+            // カテゴリでグループ化
+            var groupedProjects = projects.GroupBy(p => string.IsNullOrEmpty(p.Category) ? "未分類" : p.Category)
+                                          .OrderBy(g => g.Key == "未分類" ? "z" : g.Key) // 未分類を最後に
+                                          .ToList();
+
+            foreach (var group in groupedProjects)
+            {
+                // カテゴリ内でプロジェクト名順に並び替え
+                var categoryProjects = group.OrderBy(p => p.Name).ToList();
+                result.AddRange(categoryProjects);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// 利用可能なカテゴリ一覧を取得
+        /// </summary>
+        /// <param name="projects">プロジェクトリスト</param>
+        /// <returns>カテゴリ一覧</returns>
+        public static List<string> GetAvailableCategories(List<ProjectData> projects)
+        {
+            var categories = projects.Where(p => !string.IsNullOrEmpty(p.Category))
+                                   .Select(p => p.Category)
+                                   .Distinct()
+                                   .OrderBy(c => c)
+                                   .ToList();
+            
+            return categories;
+        }
+
+        /// <summary>
+        /// プロジェクトを指定カテゴリに移動
+        /// </summary>
+        /// <param name="project">移動対象プロジェクト</param>
+        /// <param name="newCategory">新しいカテゴリ</param>
+        public static void MoveProjectToCategory(ProjectData project, string newCategory)
+        {
+            project.Category = newCategory ?? "";
         }
     }
 }
