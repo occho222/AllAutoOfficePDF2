@@ -5,7 +5,6 @@ using System.Linq;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
 using System.Threading.Tasks;
-using Word = Microsoft.Office.Interop.Word;
 using System.Diagnostics;
 using AllAutoOfficePDF2.Models;
 using System.Runtime.InteropServices;
@@ -198,13 +197,29 @@ namespace AllAutoOfficePDF2.Services
         /// <param name="targetPages">対象ページ</param>
         private static void ConvertWordToPdf(string inputPath, string outputPath, string targetPages = "")
         {
-            Word.Application? wordApp = null;
-            Word.Document? document = null;
+            dynamic? wordApp = null;
+            dynamic? document = null;
 
             try
             {
-                wordApp = new Word.Application();
+                // 既存のWordプロセスをクリーンアップ
+                KillExistingWordProcesses();
+
+                // Wordアプリケーションを動的に作成
+                var wordType = Type.GetTypeFromProgID("Word.Application");
+                if (wordType == null)
+                {
+                    throw new InvalidOperationException("Word Applicationが見つかりません。");
+                }
+
+                wordApp = Activator.CreateInstance(wordType);
+                if (wordApp == null)
+                {
+                    throw new InvalidOperationException("Word Applicationの起動ができませんでした。");
+                }
+
                 wordApp.Visible = false;
+                wordApp.DisplayAlerts = 0; // wdAlertsNone = 0
                 document = wordApp.Documents.Open(inputPath);
 
                 var targetPageList = ParsePageRange(targetPages);
@@ -212,7 +227,7 @@ namespace AllAutoOfficePDF2.Services
                 if (targetPageList.Any())
                 {
                     // 指定ページのみ変換
-                    var totalPages = document.ComputeStatistics(Word.WdStatistic.wdStatisticPages);
+                    var totalPages = document.ComputeStatistics(4); // wdStatisticPages = 4
 
                     // 存在しないページのチェック
                     var invalidPages = targetPageList.Where(p => p > totalPages).ToList();
@@ -222,23 +237,42 @@ namespace AllAutoOfficePDF2.Services
                     }
 
                     // ページ範囲指定でPDF出力
-                    document.ExportAsFixedFormat(outputPath, Word.WdExportFormat.wdExportFormatPDF,
-                        Range: Word.WdExportRange.wdExportFromTo,
-                        From: targetPageList.Min(),
-                        To: targetPageList.Max());
+                    // wdExportFormatPDF = 17, wdExportFromTo = 3
+                    document.ExportAsFixedFormat(outputPath, 17, Range: 3, From: targetPageList.Min(), To: targetPageList.Max());
                 }
                 else
                 {
                     // 全ページ変換
-                    document.ExportAsFixedFormat(outputPath, Word.WdExportFormat.wdExportFormatPDF);
+                    // wdExportFormatPDF = 17
+                    document.ExportAsFixedFormat(outputPath, 17);
                 }
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Word変換中にエラーが発生しました: {ex.Message}", ex);
             }
             finally
             {
-                document?.Close(false);
-                wordApp?.Quit();
+                try
+                {
+                    document?.Close(false);
+                    wordApp?.Quit();
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Word終了処理でエラー: {ex.Message}");
+                }
+
                 if (document != null) ReleaseComObject(document);
                 if (wordApp != null) ReleaseComObject(wordApp);
+
+                // 強制ガベージコレクション
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
+
+                // 残存プロセスを強制終了
+                KillExistingWordProcesses();
             }
         }
 
@@ -394,6 +428,40 @@ namespace AllAutoOfficePDF2.Services
             catch (Exception ex)
             {
                 Debug.WriteLine($"Excelプロセス終了処理でエラー: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 既存のWordプロセスを強制終了
+        /// </summary>
+        private static void KillExistingWordProcesses()
+        {
+            try
+            {
+                var processes = Process.GetProcessesByName("WINWORD");
+                foreach (var proc in processes)
+                {
+                    try
+                    {
+                        if (!proc.HasExited)
+                        {
+                            proc.Kill();
+                            proc.WaitForExit(3000);
+                        }
+                    }
+                    catch { }
+                    finally
+                    {
+                        proc.Dispose();
+                    }
+                }
+                
+                // 少し待機
+                System.Threading.Thread.Sleep(500);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Wordプロセス終了処理でエラー: {ex.Message}");
             }
         }
 
