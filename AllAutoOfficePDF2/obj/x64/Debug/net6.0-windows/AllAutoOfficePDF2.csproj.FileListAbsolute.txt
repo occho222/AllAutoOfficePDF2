@@ -1,0 +1,9 @@
+C:\Users\occho\Desktop\aaa\AllAutoOfficePDF2\AllAutoOfficePDF2\obj\x64\Debug\net6.0-windows\AllAutoOfficePDF2.csproj.AssemblyReference.cache
+C:\Users\occho\Desktop\aaa\AllAutoOfficePDF2\AllAutoOfficePDF2\obj\x64\Debug\net6.0-windows\Views\ProjectEditDialog.baml
+C:\Users\occho\Desktop\aaa\AllAutoOfficePDF2\AllAutoOfficePDF2\obj\x64\Debug\net6.0-windows\App.baml
+C:\Users\occho\Desktop\aaa\AllAutoOfficePDF2\AllAutoOfficePDF2\obj\x64\Debug\net6.0-windows\Views\MainWindow.g.cs
+C:\Users\occho\Desktop\aaa\AllAutoOfficePDF2\AllAutoOfficePDF2\obj\x64\Debug\net6.0-windows\Views\ProjectEditDialog.g.cs
+C:\Users\occho\Desktop\aaa\AllAutoOfficePDF2\AllAutoOfficePDF2\obj\x64\Debug\net6.0-windows\App.g.cs
+C:\Users\occho\Desktop\aaa\AllAutoOfficePDF2\AllAutoOfficePDF2\obj\x64\Debug\net6.0-windows\GeneratedInternalTypeHelper.g.cs
+C:\Users\occho\Desktop\aaa\AllAutoOfficePDF2\AllAutoOfficePDF2\obj\x64\Debug\net6.0-windows\AllAutoOfficePDF2_MarkupCompile.cache
+C:\Users\occho\Desktop\aaa\AllAutoOfficePDF2\AllAutoOfficePDF2\obj\x64\Debug\net6.0-windows\AllAutoOfficePDF2_MarkupCompile.lref
