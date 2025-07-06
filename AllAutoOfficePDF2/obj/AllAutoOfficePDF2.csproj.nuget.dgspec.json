@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\occho\\Desktop\\bbb\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\AllAutoOfficePDF2.csproj": {}
+    "C:\\Users\\occho\\Desktop\\eee\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\AllAutoOfficePDF2.csproj": {}
   },
   "projects": {
-    "C:\\Users\\occho\\Desktop\\bbb\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\AllAutoOfficePDF2.csproj": {
+    "C:\\Users\\occho\\Desktop\\eee\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\AllAutoOfficePDF2.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\occho\\Desktop\\bbb\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\AllAutoOfficePDF2.csproj",
+        "projectUniqueName": "C:\\Users\\occho\\Desktop\\eee\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\AllAutoOfficePDF2.csproj",
         "projectName": "AllAutoOfficePDF2",
-        "projectPath": "C:\\Users\\occho\\Desktop\\bbb\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\AllAutoOfficePDF2.csproj",
+        "projectPath": "C:\\Users\\occho\\Desktop\\eee\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\AllAutoOfficePDF2.csproj",
         "packagesPath": "C:\\Users\\occho\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\occho\\Desktop\\bbb\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\obj\\",
+        "outputPath": "C:\\Users\\occho\\Desktop\\eee\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -51,18 +51,6 @@
         "net6.0-windows7.0": {
           "targetAlias": "net6.0-windows",
           "dependencies": {
-            "Microsoft.Office.Interop.Excel": {
-              "target": "Package",
-              "version": "[15.0.4795.1001, )"
-            },
-            "Microsoft.Office.Interop.PowerPoint": {
-              "target": "Package",
-              "version": "[15.0.4420.1018, )"
-            },
-            "Microsoft.Office.Interop.Word": {
-              "target": "Package",
-              "version": "[15.0.4797.1004, )"
-            },
             "System.Text.Json": {
               "target": "Package",
               "version": "[9.0.6, )"

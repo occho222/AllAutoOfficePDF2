@@ -1,15 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "nCWIoI31XOA=",
+  "dgSpecHash": "5nNCjod7t/0=",
   "success": true,
-  "projectFilePath": "C:\\Users\\occho\\Desktop\\bbb\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\AllAutoOfficePDF2.csproj",
+  "projectFilePath": "C:\\Users\\occho\\Desktop\\eee\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\AllAutoOfficePDF2.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\occho\\.nuget\\packages\\bouncycastle.cryptography\\2.4.0\\bouncycastle.cryptography.2.4.0.nupkg.sha512",
     "C:\\Users\\occho\\.nuget\\packages\\itextsharp\\5.5.13.4\\itextsharp.5.5.13.4.nupkg.sha512",
     "C:\\Users\\occho\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\9.0.6\\microsoft.bcl.asyncinterfaces.9.0.6.nupkg.sha512",
-    "C:\\Users\\occho\\.nuget\\packages\\microsoft.office.interop.excel\\15.0.4795.1001\\microsoft.office.interop.excel.15.0.4795.1001.nupkg.sha512",
-    "C:\\Users\\occho\\.nuget\\packages\\microsoft.office.interop.powerpoint\\15.0.4420.1018\\microsoft.office.interop.powerpoint.15.0.4420.1018.nupkg.sha512",
-    "C:\\Users\\occho\\.nuget\\packages\\microsoft.office.interop.word\\15.0.4797.1004\\microsoft.office.interop.word.15.0.4797.1004.nupkg.sha512",
     "C:\\Users\\occho\\.nuget\\packages\\system.buffers\\4.5.1\\system.buffers.4.5.1.nupkg.sha512",
     "C:\\Users\\occho\\.nuget\\packages\\system.io.pipelines\\9.0.6\\system.io.pipelines.9.0.6.nupkg.sha512",
     "C:\\Users\\occho\\.nuget\\packages\\system.memory\\4.5.5\\system.memory.4.5.5.nupkg.sha512",
@@ -23,9 +20,9 @@
       "code": "NU1701",
       "level": "Warning",
       "message": "パッケージ 'iTextSharp 5.5.13.4' はプロジェクトのターゲット フレームワーク 'net6.0-windows7.0' ではなく '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' を使用して復元されました。このパッケージは、使用しているプロジェクトとの完全な互換性がない可能性があります。",
-      "projectPath": "C:\\Users\\occho\\Desktop\\bbb\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\AllAutoOfficePDF2.csproj",
+      "projectPath": "C:\\Users\\occho\\Desktop\\eee\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\AllAutoOfficePDF2.csproj",
       "warningLevel": 1,
-      "filePath": "C:\\Users\\occho\\Desktop\\bbb\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\AllAutoOfficePDF2.csproj",
+      "filePath": "C:\\Users\\occho\\Desktop\\eee\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\AllAutoOfficePDF2.csproj",
       "libraryId": "iTextSharp",
       "targetGraphs": [
         "net6.0-windows7.0"

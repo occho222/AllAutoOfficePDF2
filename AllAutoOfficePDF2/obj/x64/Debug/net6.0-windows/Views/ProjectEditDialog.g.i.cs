@@ -141,7 +141,7 @@ namespace AllAutoOfficePDF2.Views {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/AllAutoOfficePDF2;V1.0.0.0;component/views/projecteditdialog.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/AllAutoOfficePDF2;component/views/projecteditdialog.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\..\..\Views\ProjectEditDialog.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

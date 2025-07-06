@@ -5,10 +5,10 @@ using System.Linq;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
 using System.Threading.Tasks;
-using WordInterop = Microsoft.Office.Interop.Word;
-using ExcelInterop = Microsoft.Office.Interop.Excel;
+using Word = Microsoft.Office.Interop.Word;
 using System.Diagnostics;
 using AllAutoOfficePDF2.Models;
+using System.Runtime.InteropServices;
 
 namespace AllAutoOfficePDF2.Services
 {
@@ -71,6 +71,8 @@ namespace AllAutoOfficePDF2.Services
                     if (!File.Exists(outputPath))
                         File.Copy(filePath, outputPath, overwrite: false);
                     break;
+                default:
+                    throw new NotSupportedException($"対応していないファイル形式: {extension}");
             }
         }
 
@@ -93,13 +95,32 @@ namespace AllAutoOfficePDF2.Services
         /// <param name="targetPages">対象ページ</param>
         private static void ConvertExcelToPdf(string inputPath, string outputPath, string targetPages = "")
         {
-            ExcelInterop.Application? excelApp = null;
-            ExcelInterop.Workbook? workbook = null;
+            dynamic? excelApp = null;
+            dynamic? workbook = null;
 
             try
             {
-                excelApp = new ExcelInterop.Application();
+                // 既存のExcelプロセスを強制終了
+                KillExistingExcelProcesses();
+
+                // Excelアプリケーションを動的に作成
+                var excelType = Type.GetTypeFromProgID("Excel.Application");
+                if (excelType == null)
+                {
+                    throw new InvalidOperationException("Excel Applicationが見つかりません。");
+                }
+
+                excelApp = Activator.CreateInstance(excelType);
+                if (excelApp == null)
+                {
+                    throw new InvalidOperationException("Excel Applicationの起動ができませんでした。");
+                }
+
                 excelApp.Visible = false;
+                excelApp.DisplayAlerts = false;
+                excelApp.ScreenUpdating = false;
+                excelApp.EnableEvents = false;
+                
                 workbook = excelApp.Workbooks.Open(inputPath);
 
                 var targetSheets = ParsePageRange(targetPages);
@@ -117,41 +138,55 @@ namespace AllAutoOfficePDF2.Services
                     }
 
                     // 指定シートを選択
-                    var sheetsToSelect = new ExcelInterop.Worksheet[targetSheets.Count];
                     for (int i = 0; i < targetSheets.Count; i++)
                     {
-                        sheetsToSelect[i] = (ExcelInterop.Worksheet)workbook.Worksheets[targetSheets[i]];
-                    }
-
-                    // 複数シートを選択
-                    if (sheetsToSelect.Length > 1)
-                    {
-                        sheetsToSelect[0].Select();
-                        for (int i = 1; i < sheetsToSelect.Length; i++)
+                        var sheet = workbook.Worksheets[targetSheets[i]];
+                        
+                        if (i == 0)
                         {
-                            sheetsToSelect[i].Select(false); // 追加選択
+                            sheet.Select();
+                        }
+                        else
+                        {
+                            sheet.Select(false); // 追加選択
                         }
                     }
-                    else
-                    {
-                        sheetsToSelect[0].Select();
-                    }
 
-                    // 選択されたシートをPDF変換
-                    ((ExcelInterop.Worksheet)excelApp.ActiveSheet).ExportAsFixedFormat(ExcelInterop.XlFixedFormatType.xlTypePDF, outputPath);
+                    // 選択されたシートをPDF変換 (xlTypePDF = 0)
+                    excelApp.ActiveSheet.ExportAsFixedFormat(0, outputPath);
                 }
                 else
                 {
-                    // 全シート変換
-                    workbook.ExportAsFixedFormat(ExcelInterop.XlFixedFormatType.xlTypePDF, outputPath);
+                    // 全シート変換 (xlTypePDF = 0)
+                    workbook.ExportAsFixedFormat(0, outputPath);
                 }
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Excel変換中にエラーが発生しました: {ex.Message}", ex);
             }
             finally
             {
-                workbook?.Close(false);
-                excelApp?.Quit();
+                try
+                {
+                    workbook?.Close(false);
+                    excelApp?.Quit();
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Excel終了処理でエラー: {ex.Message}");
+                }
+
                 if (workbook != null) ReleaseComObject(workbook);
                 if (excelApp != null) ReleaseComObject(excelApp);
+
+                // 強制ガベージコレクション
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
+
+                // 残存プロセスを強制終了
+                KillExistingExcelProcesses();
             }
         }
 
@@ -163,12 +198,12 @@ namespace AllAutoOfficePDF2.Services
         /// <param name="targetPages">対象ページ</param>
         private static void ConvertWordToPdf(string inputPath, string outputPath, string targetPages = "")
         {
-            WordInterop.Application? wordApp = null;
-            WordInterop.Document? document = null;
+            Word.Application? wordApp = null;
+            Word.Document? document = null;
 
             try
             {
-                wordApp = new WordInterop.Application();
+                wordApp = new Word.Application();
                 wordApp.Visible = false;
                 document = wordApp.Documents.Open(inputPath);
 
@@ -177,7 +212,7 @@ namespace AllAutoOfficePDF2.Services
                 if (targetPageList.Any())
                 {
                     // 指定ページのみ変換
-                    var totalPages = document.ComputeStatistics(WordInterop.WdStatistic.wdStatisticPages);
+                    var totalPages = document.ComputeStatistics(Word.WdStatistic.wdStatisticPages);
 
                     // 存在しないページのチェック
                     var invalidPages = targetPageList.Where(p => p > totalPages).ToList();
@@ -187,15 +222,15 @@ namespace AllAutoOfficePDF2.Services
                     }
 
                     // ページ範囲指定でPDF出力
-                    document.ExportAsFixedFormat(outputPath, WordInterop.WdExportFormat.wdExportFormatPDF,
-                        Range: WordInterop.WdExportRange.wdExportFromTo,
+                    document.ExportAsFixedFormat(outputPath, Word.WdExportFormat.wdExportFormatPDF,
+                        Range: Word.WdExportRange.wdExportFromTo,
                         From: targetPageList.Min(),
                         To: targetPageList.Max());
                 }
                 else
                 {
                     // 全ページ変換
-                    document.ExportAsFixedFormat(outputPath, WordInterop.WdExportFormat.wdExportFormatPDF);
+                    document.ExportAsFixedFormat(outputPath, Word.WdExportFormat.wdExportFormatPDF);
                 }
             }
             finally
@@ -230,7 +265,7 @@ namespace AllAutoOfficePDF2.Services
                 pptApp = Activator.CreateInstance(pptType);
                 if (pptApp == null)
                 {
-                    throw new InvalidOperationException("PowerPointアプリケーションを起動できませんでした。");
+                    throw new InvalidOperationException("PowerPointアプリケーションの起動ができませんでした。");
                 }
                 
                 presentation = pptApp.Presentations.Open(inputPath);
@@ -268,15 +303,25 @@ namespace AllAutoOfficePDF2.Services
                 }
                 else
                 {
-                    // 全スライド変換（元のプレゼンテーションをそのまま使用）
+                    // 全スライド変換
                     presentation.SaveAs(outputPath, 32); // 32 = ppSaveAsPDF
                 }
 
                 presentation?.Close();
             }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"PowerPoint変換中にエラーが発生しました: {ex.Message}", ex);
+            }
             finally
             {
-                try { pptApp?.Quit(); } catch { }
+                try 
+                { 
+                    presentation?.Close();
+                    pptApp?.Quit(); 
+                } 
+                catch { }
+                
                 if (presentation != null) ReleaseComObject(presentation);
                 if (pptApp != null) ReleaseComObject(pptApp);
 
@@ -300,10 +345,55 @@ namespace AllAutoOfficePDF2.Services
                 GC.WaitForPendingFinalizers();
 
                 // PowerPointプロセスが残っていれば強制終了（最終手段）
-                foreach (var proc in Process.GetProcessesByName("POWERPNT"))
+                try
                 {
-                    try { proc.Kill(); } catch { }
+                    foreach (var proc in Process.GetProcessesByName("POWERPNT"))
+                    {
+                        if (!proc.HasExited)
+                        {
+                            proc.Kill();
+                            proc.WaitForExit(1000);
+                        }
+                    }
                 }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"PowerPointプロセス終了処理でエラー: {ex.Message}");
+                }
+            }
+        }
+
+        /// <summary>
+        /// 既存のExcelプロセスを強制終了
+        /// </summary>
+        private static void KillExistingExcelProcesses()
+        {
+            try
+            {
+                var processes = Process.GetProcessesByName("EXCEL");
+                foreach (var proc in processes)
+                {
+                    try
+                    {
+                        if (!proc.HasExited)
+                        {
+                            proc.Kill();
+                            proc.WaitForExit(3000);
+                        }
+                    }
+                    catch { }
+                    finally
+                    {
+                        proc.Dispose();
+                    }
+                }
+                
+                // 少し待機
+                System.Threading.Thread.Sleep(500);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Excelプロセス終了処理でエラー: {ex.Message}");
             }
         }
 
@@ -384,11 +474,15 @@ namespace AllAutoOfficePDF2.Services
         {
             if (obj != null)
             {
-                System.Runtime.InteropServices.Marshal.ReleaseComObject(obj);
-                obj = null;
+                try
+                {
+                    Marshal.ReleaseComObject(obj);
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"COMオブジェクト解放エラー: {ex.Message}");
+                }
             }
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
         }
 
         /// <summary>

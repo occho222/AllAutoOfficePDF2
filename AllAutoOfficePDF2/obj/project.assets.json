@@ -43,33 +43,6 @@
           "buildTransitive/netcoreapp2.0/Microsoft.Bcl.AsyncInterfaces.targets": {}
         }
       },
-      "Microsoft.Office.Interop.Excel/15.0.4795.1001": {
-        "type": "package",
-        "compile": {
-          "lib/netstandard2.0/Microsoft.Office.Interop.Excel.dll": {}
-        },
-        "runtime": {
-          "lib/netstandard2.0/Microsoft.Office.Interop.Excel.dll": {}
-        }
-      },
-      "Microsoft.Office.Interop.PowerPoint/15.0.4420.1018": {
-        "type": "package",
-        "compile": {
-          "lib/netstandard2.0/Microsoft.Office.Interop.PowerPoint.dll": {}
-        },
-        "runtime": {
-          "lib/netstandard2.0/Microsoft.Office.Interop.PowerPoint.dll": {}
-        }
-      },
-      "Microsoft.Office.Interop.Word/15.0.4797.1004": {
-        "type": "package",
-        "compile": {
-          "lib/netstandard2.0/Microsoft.Office.Interop.Word.dll": {}
-        },
-        "runtime": {
-          "lib/netstandard2.0/Microsoft.Office.Interop.Word.dll": {}
-        }
-      },
       "System.Buffers/4.5.1": {
         "type": "package",
         "compile": {
@@ -243,45 +216,6 @@
         "microsoft.bcl.asyncinterfaces.9.0.6.nupkg.sha512",
         "microsoft.bcl.asyncinterfaces.nuspec",
         "useSharedDesignerContext.txt"
-      ]
-    },
-    "Microsoft.Office.Interop.Excel/15.0.4795.1001": {
-      "sha512": "cuvqi/U5MYSM0gvR2l90q0m/urRgmg69EiwP5VWp1RcaJ0YT5G26Va5LaOZ3KJFc22FNihS5CUjeePUp2YpGQA==",
-      "type": "package",
-      "path": "microsoft.office.interop.excel/15.0.4795.1001",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "lib/net20/Microsoft.Office.Interop.Excel.dll",
-        "lib/netstandard2.0/Microsoft.Office.Interop.Excel.dll",
-        "microsoft.office.interop.excel.15.0.4795.1001.nupkg.sha512",
-        "microsoft.office.interop.excel.nuspec"
-      ]
-    },
-    "Microsoft.Office.Interop.PowerPoint/15.0.4420.1018": {
-      "sha512": "3XkJAqbYq93MqqSOPusNE+6Tve5yBkbE92n9W8f+k8Z9AzXeoTMqMYqhZMrzVOp4saHhMMbOD78JkCjvk+qIzw==",
-      "type": "package",
-      "path": "microsoft.office.interop.powerpoint/15.0.4420.1018",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "lib/net20/Microsoft.Office.Interop.PowerPoint.dll",
-        "lib/netstandard2.0/Microsoft.Office.Interop.PowerPoint.dll",
-        "microsoft.office.interop.powerpoint.15.0.4420.1018.nupkg.sha512",
-        "microsoft.office.interop.powerpoint.nuspec"
-      ]
-    },
-    "Microsoft.Office.Interop.Word/15.0.4797.1004": {
-      "sha512": "lavTOrMGK/o/t3+gGr7JuVrL8XDdnS0DwPLcYv/StOiysXO4L0C36IXTVtEJo1Mh9Aoxo9a8dgGcPi+faTlv0g==",
-      "type": "package",
-      "path": "microsoft.office.interop.word/15.0.4797.1004",
-      "files": [
-        ".nupkg.metadata",
-        ".signature.p7s",
-        "lib/net20/Microsoft.Office.Interop.Word.dll",
-        "lib/netstandard2.0/Microsoft.Office.Interop.Word.dll",
-        "microsoft.office.interop.word.15.0.4797.1004.nupkg.sha512",
-        "microsoft.office.interop.word.nuspec"
       ]
     },
     "System.Buffers/4.5.1": {
@@ -534,9 +468,6 @@
   },
   "projectFileDependencyGroups": {
     "net6.0-windows7.0": [
-      "Microsoft.Office.Interop.Excel >= 15.0.4795.1001",
-      "Microsoft.Office.Interop.PowerPoint >= 15.0.4420.1018",
-      "Microsoft.Office.Interop.Word >= 15.0.4797.1004",
       "System.Text.Json >= 9.0.6",
       "iTextSharp >= 5.5.13.4"
     ]
@@ -548,11 +479,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\occho\\Desktop\\bbb\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\AllAutoOfficePDF2.csproj",
+      "projectUniqueName": "C:\\Users\\occho\\Desktop\\eee\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\AllAutoOfficePDF2.csproj",
       "projectName": "AllAutoOfficePDF2",
-      "projectPath": "C:\\Users\\occho\\Desktop\\bbb\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\AllAutoOfficePDF2.csproj",
+      "projectPath": "C:\\Users\\occho\\Desktop\\eee\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\AllAutoOfficePDF2.csproj",
       "packagesPath": "C:\\Users\\occho\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\occho\\Desktop\\bbb\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\obj\\",
+      "outputPath": "C:\\Users\\occho\\Desktop\\eee\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -592,18 +523,6 @@
       "net6.0-windows7.0": {
         "targetAlias": "net6.0-windows",
         "dependencies": {
-          "Microsoft.Office.Interop.Excel": {
-            "target": "Package",
-            "version": "[15.0.4795.1001, )"
-          },
-          "Microsoft.Office.Interop.PowerPoint": {
-            "target": "Package",
-            "version": "[15.0.4420.1018, )"
-          },
-          "Microsoft.Office.Interop.Word": {
-            "target": "Package",
-            "version": "[15.0.4797.1004, )"
-          },
           "System.Text.Json": {
             "target": "Package",
             "version": "[9.0.6, )"

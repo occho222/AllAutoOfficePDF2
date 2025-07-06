@@ -33,30 +33,6 @@
           }
         }
       },
-      "Microsoft.Office.Interop.Excel/15.0.4795.1001": {
-        "runtime": {
-          "lib/netstandard2.0/Microsoft.Office.Interop.Excel.dll": {
-            "assemblyVersion": "15.0.0.0",
-            "fileVersion": "15.0.4795.1000"
-          }
-        }
-      },
-      "Microsoft.Office.Interop.PowerPoint/15.0.4420.1018": {
-        "runtime": {
-          "lib/netstandard2.0/Microsoft.Office.Interop.PowerPoint.dll": {
-            "assemblyVersion": "15.0.0.0",
-            "fileVersion": "15.0.4420.1017"
-          }
-        }
-      },
-      "Microsoft.Office.Interop.Word/15.0.4797.1004": {
-        "runtime": {
-          "lib/netstandard2.0/Microsoft.Office.Interop.Word.dll": {
-            "assemblyVersion": "15.0.0.0",
-            "fileVersion": "15.0.4797.1003"
-          }
-        }
-      },
       "System.Buffers/4.5.1": {},
       "System.IO.Pipelines/9.0.6": {
         "dependencies": {
@@ -134,27 +110,6 @@
       "sha512": "sha512-82rLw487j5jBXEi2r3WvA/cagOhcRREVRtet6izzjDMY+i392W5oNSN2KCtuIvlTpyMONEUD0MIlGAgDdsvQ/w==",
       "path": "microsoft.bcl.asyncinterfaces/9.0.6",
       "hashPath": "microsoft.bcl.asyncinterfaces.9.0.6.nupkg.sha512"
-    },
-    "Microsoft.Office.Interop.Excel/15.0.4795.1001": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-cuvqi/U5MYSM0gvR2l90q0m/urRgmg69EiwP5VWp1RcaJ0YT5G26Va5LaOZ3KJFc22FNihS5CUjeePUp2YpGQA==",
-      "path": "microsoft.office.interop.excel/15.0.4795.1001",
-      "hashPath": "microsoft.office.interop.excel.15.0.4795.1001.nupkg.sha512"
-    },
-    "Microsoft.Office.Interop.PowerPoint/15.0.4420.1018": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-3XkJAqbYq93MqqSOPusNE+6Tve5yBkbE92n9W8f+k8Z9AzXeoTMqMYqhZMrzVOp4saHhMMbOD78JkCjvk+qIzw==",
-      "path": "microsoft.office.interop.powerpoint/15.0.4420.1018",
-      "hashPath": "microsoft.office.interop.powerpoint.15.0.4420.1018.nupkg.sha512"
-    },
-    "Microsoft.Office.Interop.Word/15.0.4797.1004": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-lavTOrMGK/o/t3+gGr7JuVrL8XDdnS0DwPLcYv/StOiysXO4L0C36IXTVtEJo1Mh9Aoxo9a8dgGcPi+faTlv0g==",
-      "path": "microsoft.office.interop.word/15.0.4797.1004",
-      "hashPath": "microsoft.office.interop.word.15.0.4797.1004.nupkg.sha512"
     },
     "System.Buffers/4.5.1": {
       "type": "package",
