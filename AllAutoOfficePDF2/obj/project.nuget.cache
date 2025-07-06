@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "S3QjfpN0sVI=",
+  "dgSpecHash": "vxKYorICCVA=",
   "success": true,
-  "projectFilePath": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\AllAutoOfficePDF2.csproj",
+  "projectFilePath": "C:\\Users\\occho\\Desktop\\aaa\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\AllAutoOfficePDF2.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\occho\\.nuget\\packages\\bouncycastle.cryptography\\2.4.0\\bouncycastle.cryptography.2.4.0.nupkg.sha512",
     "C:\\Users\\occho\\.nuget\\packages\\itextsharp\\5.5.13.4\\itextsharp.5.5.13.4.nupkg.sha512",
@@ -23,9 +23,9 @@
       "code": "NU1701",
       "level": "Warning",
       "message": "パッケージ 'iTextSharp 5.5.13.4' はプロジェクトのターゲット フレームワーク 'net6.0-windows7.0' ではなく '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' を使用して復元されました。このパッケージは、使用しているプロジェクトとの完全な互換性がない可能性があります。",
-      "projectPath": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\AllAutoOfficePDF2.csproj",
+      "projectPath": "C:\\Users\\occho\\Desktop\\aaa\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\AllAutoOfficePDF2.csproj",
       "warningLevel": 1,
-      "filePath": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\AllAutoOfficePDF2.csproj",
+      "filePath": "C:\\Users\\occho\\Desktop\\aaa\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\AllAutoOfficePDF2.csproj",
       "libraryId": "iTextSharp",
       "targetGraphs": [
         "net6.0-windows7.0"
