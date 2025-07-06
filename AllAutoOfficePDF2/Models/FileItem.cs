@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel;
+using System.IO;
 
 namespace AllAutoOfficePDF2.Models
 {
@@ -11,6 +12,7 @@ namespace AllAutoOfficePDF2.Models
         private bool _isSelected;
         private string _targetPages = "";
         private int _number;
+        private string _relativePath = "";
 
         /// <summary>
         /// 選択状態
@@ -84,7 +86,41 @@ namespace AllAutoOfficePDF2.Models
         /// <summary>
         /// 相対パス（サブフォルダ読み込み用）
         /// </summary>
-        public string RelativePath { get; set; } = "";
+        public string RelativePath
+        {
+            get => _relativePath;
+            set
+            {
+                _relativePath = value;
+                OnPropertyChanged(nameof(RelativePath));
+                OnPropertyChanged(nameof(FolderName));
+            }
+        }
+
+        /// <summary>
+        /// フォルダ名のみ（相対パスからフォルダ名部分のみを抽出）
+        /// </summary>
+        public string FolderName
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(RelativePath))
+                {
+                    return "";
+                }
+
+                // RelativePathがファイルパスの場合、ディレクトリ部分のみを取得
+                var directoryPath = Path.GetDirectoryName(RelativePath);
+                
+                if (string.IsNullOrEmpty(directoryPath))
+                {
+                    return "";
+                }
+
+                // 最後のフォルダ名のみを返す
+                return Path.GetFileName(directoryPath);
+            }
+        }
 
         /// <summary>
         /// プロパティ変更イベント

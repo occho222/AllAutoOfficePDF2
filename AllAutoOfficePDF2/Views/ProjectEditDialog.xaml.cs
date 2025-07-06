@@ -4,9 +4,13 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Forms;
+using System.Windows.Controls;
 using AllAutoOfficePDF2.Models;
 using AllAutoOfficePDF2.Services;
 using MessageBox = System.Windows.MessageBox;
+using DragEventArgs = System.Windows.DragEventArgs;
+using DataFormats = System.Windows.DataFormats;
+using DragDropEffects = System.Windows.DragDropEffects;
 
 namespace AllAutoOfficePDF2.Views
 {
@@ -98,6 +102,25 @@ namespace AllAutoOfficePDF2.Views
 
             // カスタムPDFパスの有効/無効を設定
             UpdateCustomPdfPathEnabled();
+            
+            // ヒントテキストの表示制御
+            UpdateDropHints();
+        }
+
+        /// <summary>
+        /// ドラッグ&ドロップヒントの表示を更新
+        /// </summary>
+        private void UpdateDropHints()
+        {
+            if (txtFolderDropHint != null)
+            {
+                txtFolderDropHint.Visibility = string.IsNullOrEmpty(txtFolderPath.Text) ? Visibility.Visible : Visibility.Collapsed;
+            }
+            
+            if (txtPdfDropHint != null)
+            {
+                txtPdfDropHint.Visibility = string.IsNullOrEmpty(txtCustomPdfPath.Text) ? Visibility.Visible : Visibility.Collapsed;
+            }
         }
 
         /// <summary>
@@ -122,6 +145,9 @@ namespace AllAutoOfficePDF2.Views
                     {
                         txtProjectName.Text = Path.GetFileName(dialog.SelectedPath);
                     }
+                    
+                    // ヒント表示を更新
+                    UpdateDropHints();
                 }
             }
         }
@@ -161,6 +187,9 @@ namespace AllAutoOfficePDF2.Views
                 {
                     // フォルダパスのみを設定（ファイル名は含めない）
                     txtCustomPdfPath.Text = dialog.SelectedPath;
+                    
+                    // ヒント表示を更新
+                    UpdateDropHints();
                 }
             }
         }
@@ -307,6 +336,366 @@ namespace AllAutoOfficePDF2.Views
         {
             DialogResult = false;
             Close();
+        }
+        #endregion
+
+        #region ドラッグ&ドロップ処理
+        /// <summary>
+        /// フォルダパス用ドラッグ&ドロップエリアのDragEnter
+        /// </summary>
+        private void FolderDropArea_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effects = DragDropEffects.Copy;
+                // ドラッグオーバー時の視覚的フィードバック
+                if (sender is Border border)
+                {
+                    border.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.LightBlue);
+                    border.BorderBrush = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.DodgerBlue);
+                }
+            }
+            else
+            {
+                e.Effects = DragDropEffects.None;
+            }
+        }
+
+        /// <summary>
+        /// フォルダパス用ドラッグ&ドロップエリアのDragOver
+        /// </summary>
+        private void FolderDropArea_DragOver(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effects = DragDropEffects.Copy;
+            }
+            else
+            {
+                e.Effects = DragDropEffects.None;
+            }
+        }
+
+        /// <summary>
+        /// フォルダパス用ドラッグ&ドロップエリアのDragLeave
+        /// </summary>
+        private void FolderDropArea_DragLeave(object sender, DragEventArgs e)
+        {
+            // ドラッグリーブ時の視覚的フィードバックを元に戻す
+            if (sender is Border border)
+            {
+                border.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(248, 249, 250));
+                border.BorderBrush = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0, 122, 204));
+            }
+        }
+
+        /// <summary>
+        /// フォルダパス用ドラッグ&ドロップエリアのDrop
+        /// </summary>
+        private void FolderDropArea_Drop(object sender, DragEventArgs e)
+        {
+            // ドラッグオーバー時の視覚的フィードバックを元に戻す
+            if (sender is Border border)
+            {
+                border.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(248, 249, 250));
+                border.BorderBrush = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0, 122, 204));
+            }
+            
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+                if (files.Length > 0)
+                {
+                    string droppedPath = files[0];
+                    
+                    // フォルダかファイルかを判定
+                    if (Directory.Exists(droppedPath))
+                    {
+                        txtFolderPath.Text = droppedPath;
+                        
+                        // プロジェクト名が空の場合はフォルダ名を設定
+                        if (string.IsNullOrEmpty(txtProjectName.Text))
+                        {
+                            txtProjectName.Text = Path.GetFileName(droppedPath);
+                        }
+                    }
+                    else if (File.Exists(droppedPath))
+                    {
+                        // ファイルの場合は親フォルダを使用
+                        string parentFolder = Path.GetDirectoryName(droppedPath);
+                        if (!string.IsNullOrEmpty(parentFolder))
+                        {
+                            txtFolderPath.Text = parentFolder;
+                            
+                            // プロジェクト名が空の場合はフォルダ名を設定
+                            if (string.IsNullOrEmpty(txtProjectName.Text))
+                            {
+                                txtProjectName.Text = Path.GetFileName(parentFolder);
+                            }
+                        }
+                    }
+                    
+                    // ヒント表示を更新
+                    UpdateDropHints();
+                }
+            }
+        }
+
+        /// <summary>
+        /// PDF保存パス用ドラッグ&ドロップエリアのDragEnter
+        /// </summary>
+        private void PdfDropArea_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effects = DragDropEffects.Copy;
+                // ドラッグオーバー時の視覚的フィードバック
+                if (sender is Border border)
+                {
+                    border.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.LightBlue);
+                    border.BorderBrush = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.DodgerBlue);
+                }
+            }
+            else
+            {
+                e.Effects = DragDropEffects.None;
+            }
+        }
+
+        /// <summary>
+        /// PDF保存パス用ドラッグ&ドロップエリアのDragOver
+        /// </summary>
+        private void PdfDropArea_DragOver(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effects = DragDropEffects.Copy;
+            }
+            else
+            {
+                e.Effects = DragDropEffects.None;
+            }
+        }
+
+        /// <summary>
+        /// PDF保存パス用ドラッグ&ドロップエリアのDragLeave
+        /// </summary>
+        private void PdfDropArea_DragLeave(object sender, DragEventArgs e)
+        {
+            // ドラッグリーブ時の視覚的フィードバックを元に戻す
+            if (sender is Border border)
+            {
+                border.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(248, 249, 250));
+                border.BorderBrush = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0, 122, 204));
+            }
+        }
+
+        /// <summary>
+        /// PDF保存パス用ドラッグ&ドロップエリアのDrop
+        /// </summary>
+        private void PdfDropArea_Drop(object sender, DragEventArgs e)
+        {
+            // ドラッグオーバー時の視覚的フィードバックを元に戻す
+            if (sender is Border border)
+            {
+                border.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(248, 249, 250));
+                border.BorderBrush = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0, 122, 204));
+            }
+            
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+                if (files.Length > 0)
+                {
+                    string droppedPath = files[0];
+                    
+                    // フォルダかファイルかを判定
+                    if (Directory.Exists(droppedPath))
+                    {
+                        // フォルダパスのみを設定（ファイル名は含めない）
+                        txtCustomPdfPath.Text = droppedPath;
+                    }
+                    else if (File.Exists(droppedPath))
+                    {
+                        // ファイルの場合は親フォルダを使用
+                        string parentFolder = Path.GetDirectoryName(droppedPath);
+                        if (!string.IsNullOrEmpty(parentFolder))
+                        {
+                            txtCustomPdfPath.Text = parentFolder;
+                        }
+                    }
+                    
+                    // ヒント表示を更新
+                    UpdateDropHints();
+                }
+            }
+        }
+
+        /// <summary>
+        /// フォルダパステキストボックスのドラッグエンター（旧版の互換性維持）
+        /// </summary>
+        private void TxtFolderPath_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effects = DragDropEffects.Copy;
+                // ドラッグオーバー時の視覚的フィードバック
+                txtFolderPath.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.LightBlue);
+            }
+            else
+            {
+                e.Effects = DragDropEffects.None;
+            }
+        }
+
+        /// <summary>
+        /// フォルダパステキストボックスのドラッグオーバー（旧版の互換性維持）
+        /// </summary>
+        private void TxtFolderPath_DragOver(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effects = DragDropEffects.Copy;
+            }
+            else
+            {
+                e.Effects = DragDropEffects.None;
+            }
+        }
+
+        /// <summary>
+        /// フォルダパステキストボックスのドラッグリーブ（旧版の互換性維持）
+        /// </summary>
+        private void TxtFolderPath_DragLeave(object sender, DragEventArgs e)
+        {
+            // ドラッグリーブ時の視覚的フィードバックを元に戻す
+            txtFolderPath.Background = System.Windows.Media.Brushes.White;
+        }
+
+        /// <summary>
+        /// フォルダパステキストボックスのドロップ（旧版の互換性維持）
+        /// </summary>
+        private void TxtFolderPath_Drop(object sender, DragEventArgs e)
+        {
+            // ドラッグオーバー時の視覚的フィードバックを元に戻す
+            txtFolderPath.Background = System.Windows.Media.Brushes.White;
+            
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+                if (files.Length > 0)
+                {
+                    string droppedPath = files[0];
+                    
+                    // フォルダかファイルかを判定
+                    if (Directory.Exists(droppedPath))
+                    {
+                        txtFolderPath.Text = droppedPath;
+                        
+                        // プロジェクト名が空の場合はフォルダ名を設定
+                        if (string.IsNullOrEmpty(txtProjectName.Text))
+                        {
+                            txtProjectName.Text = Path.GetFileName(droppedPath);
+                        }
+                    }
+                    else if (File.Exists(droppedPath))
+                    {
+                        // ファイルの場合は親フォルダを使用
+                        string parentFolder = Path.GetDirectoryName(droppedPath);
+                        if (!string.IsNullOrEmpty(parentFolder))
+                        {
+                            txtFolderPath.Text = parentFolder;
+                            
+                            // プロジェクト名が空の場合はフォルダ名を設定
+                            if (string.IsNullOrEmpty(txtProjectName.Text))
+                            {
+                                txtProjectName.Text = Path.GetFileName(parentFolder);
+                            }
+                        }
+                    }
+                    
+                    // ヒント表示を更新
+                    UpdateDropHints();
+                }
+            }
+        }
+
+        /// <summary>
+        /// カスタムPDF保存パステキストボックスのドラッグエンター（旧版の互換性維持）
+        /// </summary>
+        private void TxtCustomPdfPath_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effects = DragDropEffects.Copy;
+                // ドラッグオーバー時の視覚的フィードバック
+                txtCustomPdfPath.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.LightBlue);
+            }
+            else
+            {
+                e.Effects = DragDropEffects.None;
+            }
+        }
+
+        /// <summary>
+        /// カスタムPDF保存パステキストボックスのドラッグオーバー（旧版の互換性維持）
+        /// </summary>
+        private void TxtCustomPdfPath_DragOver(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effects = DragDropEffects.Copy;
+            }
+            else
+            {
+                e.Effects = DragDropEffects.None;
+            }
+        }
+
+        /// <summary>
+        /// カスタムPDF保存パステキストボックスのドラッグリーブ（旧版の互換性維持）
+        /// </summary>
+        private void TxtCustomPdfPath_DragLeave(object sender, DragEventArgs e)
+        {
+            // ドラッグリーブ時の視覚的フィードバックを元に戻す
+            txtCustomPdfPath.Background = System.Windows.Media.Brushes.White;
+        }
+
+        /// <summary>
+        /// カスタムPDF保存パステキストボックスのドロップ（旧版の互換性維持）
+        /// </summary>
+        private void TxtCustomPdfPath_Drop(object sender, DragEventArgs e)
+        {
+            // ドラッグオーバー時の視覚的フィードバックを元に戻す
+            txtCustomPdfPath.Background = System.Windows.Media.Brushes.White;
+            
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+                if (files.Length > 0)
+                {
+                    string droppedPath = files[0];
+                    
+                    // フォルダかファイルかを判定
+                    if (Directory.Exists(droppedPath))
+                    {
+                        // フォルダパスのみを設定（ファイル名は含めない）
+                        txtCustomPdfPath.Text = droppedPath;
+                    }
+                    else if (File.Exists(droppedPath))
+                    {
+                        // ファイルの場合は親フォルダを使用
+                        string parentFolder = Path.GetDirectoryName(droppedPath);
+                        if (!string.IsNullOrEmpty(parentFolder))
+                        {
+                            txtCustomPdfPath.Text = parentFolder;
+                        }
+                    }
+                    
+                    // ヒント表示を更新
+                    UpdateDropHints();
+                }
+            }
         }
         #endregion
     }

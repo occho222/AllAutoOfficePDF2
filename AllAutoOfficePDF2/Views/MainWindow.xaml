@@ -7,7 +7,11 @@
         xmlns:models="clr-namespace:AllAutoOfficePDF2.Models"
         mc:Ignorable="d"
         Title="AllAutoOfficePDF2" Height="700" Width="1200"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        AllowDrop="True"
+        DragEnter="Window_DragEnter"
+        DragOver="Window_DragOver"
+        Drop="Window_Drop">
     
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
@@ -144,7 +148,26 @@
                     </Grid.ColumnDefinitions>
 
                     <Label Content="対象フォルダ:" Grid.Column="0"/>
-                    <TextBox x:Name="txtFolderPath" Grid.Column="1" Margin="5,0" IsReadOnly="True"/>
+                    
+                    <!-- ドラッグ&ドロップエリアを視覚的に分かりやすくする -->
+                    <Border Grid.Column="1" Margin="5,0" BorderBrush="#007ACC" BorderThickness="2" CornerRadius="3" 
+                            Background="#F8F9FA" AllowDrop="True"
+                            DragEnter="DropArea_DragEnter"
+                            DragOver="DropArea_DragOver"
+                            DragLeave="DropArea_DragLeave"
+                            Drop="DropArea_Drop">
+                        <Grid>
+                            <TextBox x:Name="txtFolderPath" IsReadOnly="True" BorderThickness="0" Background="Transparent"
+                                     VerticalAlignment="Center" Margin="5,3" />
+                            
+                            <!-- ドラッグ&ドロップヒント -->
+                            <TextBlock x:Name="txtDropHint" Text="📁 フォルダをここにドラッグ&amp;ドロップ"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                                       FontSize="12" Foreground="#6C757D" FontStyle="Italic"
+                                       Visibility="Visible"/>
+                        </Grid>
+                    </Border>
+                    
                     <Button x:Name="btnSelectFolder" Content="フォルダ選択" Grid.Column="2" 
                             Width="100" Margin="5,0" Click="BtnSelectFolder_Click"/>
                     <Button x:Name="btnOpenCurrentProjectFolder" Content="📂 フォルダを開く" Grid.Column="3" 
@@ -198,7 +221,7 @@
                             </Style>
                         </DataGridHyperlinkColumn.ElementStyle>
                     </DataGridHyperlinkColumn>
-                    <DataGridTextColumn Header="フォルダ" Binding="{Binding RelativePath}" Width="150" IsReadOnly="True"/>
+                    <DataGridTextColumn Header="フォルダ" Binding="{Binding FolderName}" Width="150" IsReadOnly="True"/>
                     <DataGridTextColumn Header="拡張子" Binding="{Binding Extension}" Width="80" IsReadOnly="True"/>
                     <DataGridTextColumn Header="対象ページ" Binding="{Binding TargetPages}" Width="100" IsReadOnly="False">
                         <DataGridTextColumn.HeaderStyle>
