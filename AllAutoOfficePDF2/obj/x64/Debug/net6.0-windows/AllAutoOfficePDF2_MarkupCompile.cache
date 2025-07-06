@@ -4,17 +4,17 @@
 winexe
 C#
 .cs
-C:\Users\occho\Desktop\aaa\AllAutoOfficePDF2\AllAutoOfficePDF2\obj\x64\Debug\net6.0-windows\
+C:\github\AllAutoOfficePDF2\AllAutoOfficePDF2\obj\x64\Debug\net6.0-windows\
 AllAutoOfficePDF2
 none
 false
 TRACE;DEBUG;NET;NET6_0;NETCOREAPP;WINDOWS;WINDOWS7_0;NET5_0_OR_GREATER;NET6_0_OR_GREATER;NETCOREAPP3_0_OR_GREATER;NETCOREAPP3_1_OR_GREATER;WINDOWS7_0_OR_GREATER
-C:\Users\occho\Desktop\aaa\AllAutoOfficePDF2\AllAutoOfficePDF2\App.xaml
+C:\github\AllAutoOfficePDF2\AllAutoOfficePDF2\App.xaml
 2-989278542
 
-12-1475143796
+141246217962
 210232181606
 Views\MainWindow.xaml;Views\ProjectEditDialog.xaml;
 
-True
+False
 

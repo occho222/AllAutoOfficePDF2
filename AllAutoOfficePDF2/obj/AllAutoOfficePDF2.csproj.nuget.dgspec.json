@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\occho\\Desktop\\aaa\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\AllAutoOfficePDF2.csproj": {}
+    "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\AllAutoOfficePDF2.csproj": {}
   },
   "projects": {
-    "C:\\Users\\occho\\Desktop\\aaa\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\AllAutoOfficePDF2.csproj": {
+    "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\AllAutoOfficePDF2.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\occho\\Desktop\\aaa\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\AllAutoOfficePDF2.csproj",
+        "projectUniqueName": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\AllAutoOfficePDF2.csproj",
         "projectName": "AllAutoOfficePDF2",
-        "projectPath": "C:\\Users\\occho\\Desktop\\aaa\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\AllAutoOfficePDF2.csproj",
+        "projectPath": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\AllAutoOfficePDF2.csproj",
         "packagesPath": "C:\\Users\\occho\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\occho\\Desktop\\aaa\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\obj\\",
+        "outputPath": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

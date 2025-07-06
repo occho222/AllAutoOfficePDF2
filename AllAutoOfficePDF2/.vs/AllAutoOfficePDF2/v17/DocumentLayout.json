@@ -1,76 +1,78 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\occho\\Desktop\\aaa\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\",
+  "WorkspaceRootPath": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|c:\\users\\occho\\desktop\\aaa\\allautoofficepdf2\\allautoofficepdf2\\views\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "AbsoluteMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|c:\\github\\allautoofficepdf2\\allautoofficepdf2\\views\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
       "RelativeMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|solutionrelative:views\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|c:\\users\\occho\\desktop\\aaa\\allautoofficepdf2\\allautoofficepdf2\\views\\projecteditdialog.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "AbsoluteMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|c:\\github\\allautoofficepdf2\\allautoofficepdf2\\views\\projecteditdialog.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
       "RelativeMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|solutionrelative:views\\projecteditdialog.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|c:\\users\\occho\\desktop\\aaa\\allautoofficepdf2\\allautoofficepdf2\\app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "AbsoluteMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|c:\\github\\allautoofficepdf2\\allautoofficepdf2\\app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
       "RelativeMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|solutionrelative:app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|c:\\users\\occho\\desktop\\aaa\\allautoofficepdf2\\allautoofficepdf2\\app.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|c:\\github\\allautoofficepdf2\\allautoofficepdf2\\app.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|solutionrelative:app.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|c:\\users\\occho\\desktop\\aaa\\allautoofficepdf2\\allautoofficepdf2\\assemblyinfo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|c:\\github\\allautoofficepdf2\\allautoofficepdf2\\assemblyinfo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|solutionrelative:assemblyinfo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|c:\\users\\occho\\desktop\\aaa\\allautoofficepdf2\\allautoofficepdf2\\allautoofficepdf2.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "AbsoluteMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|c:\\github\\allautoofficepdf2\\allautoofficepdf2\\allautoofficepdf2.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
       "RelativeMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|solutionrelative:allautoofficepdf2.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|c:\\users\\occho\\desktop\\aaa\\allautoofficepdf2\\allautoofficepdf2\\models\\projectdata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|c:\\github\\allautoofficepdf2\\allautoofficepdf2\\models\\projectdata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|solutionrelative:models\\projectdata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|c:\\users\\occho\\desktop\\aaa\\allautoofficepdf2\\allautoofficepdf2\\models\\fileitemdata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|c:\\github\\allautoofficepdf2\\allautoofficepdf2\\models\\fileitemdata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|solutionrelative:models\\fileitemdata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|c:\\users\\occho\\desktop\\aaa\\allautoofficepdf2\\allautoofficepdf2\\models\\fileitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|c:\\github\\allautoofficepdf2\\allautoofficepdf2\\models\\fileitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|solutionrelative:models\\fileitem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|c:\\users\\occho\\desktop\\aaa\\allautoofficepdf2\\allautoofficepdf2\\services\\projectmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|c:\\github\\allautoofficepdf2\\allautoofficepdf2\\services\\projectmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|solutionrelative:services\\projectmanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|c:\\users\\occho\\desktop\\aaa\\allautoofficepdf2\\allautoofficepdf2\\services\\pdfconversionservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|c:\\github\\allautoofficepdf2\\allautoofficepdf2\\services\\pdfconversionservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|solutionrelative:services\\pdfconversionservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|c:\\users\\occho\\desktop\\aaa\\allautoofficepdf2\\allautoofficepdf2\\services\\pdfmergeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|c:\\github\\allautoofficepdf2\\allautoofficepdf2\\services\\pdfmergeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|solutionrelative:services\\pdfmergeservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|c:\\users\\occho\\desktop\\aaa\\allautoofficepdf2\\allautoofficepdf2\\services\\filemanagementservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|c:\\github\\allautoofficepdf2\\allautoofficepdf2\\services\\filemanagementservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|solutionrelative:services\\filemanagementservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|c:\\users\\occho\\desktop\\aaa\\allautoofficepdf2\\allautoofficepdf2\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|c:\\github\\allautoofficepdf2\\allautoofficepdf2\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|solutionrelative:mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|c:\\users\\occho\\desktop\\aaa\\allautoofficepdf2\\allautoofficepdf2\\views\\projecteditdialog.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|c:\\github\\allautoofficepdf2\\allautoofficepdf2\\views\\projecteditdialog.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|solutionrelative:views\\projecteditdialog.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|c:\\users\\occho\\desktop\\aaa\\allautoofficepdf2\\allautoofficepdf2\\readme.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}|",
+      "AbsoluteMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|c:\\github\\allautoofficepdf2\\allautoofficepdf2\\readme.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}|",
       "RelativeMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|solutionrelative:readme.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}|"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Models\\ProjectCategoryGroup.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|c:\\github\\allautoofficepdf2\\allautoofficepdf2\\converters\\stringtovisibilityconverter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|solutionrelative:converters\\stringtovisibilityconverter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Converters\\StringToVisibilityConverter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|c:\\github\\allautoofficepdf2\\allautoofficepdf2\\models\\projectcategorygroup.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F902D404-CBAF-41EA-A8BE-A1755BAD5D7F}|AllAutoOfficePDF2.csproj|solutionrelative:models\\projectcategorygroup.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -84,24 +86,24 @@
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 16,
+              "DocumentIndex": 17,
               "Title": "ProjectCategoryGroup.cs",
               "DocumentMoniker": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Models\\ProjectCategoryGroup.cs",
-              "RelativeDocumentMoniker": "..\\..\\..\\..\\..\\..\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Models\\ProjectCategoryGroup.cs",
+              "RelativeDocumentMoniker": "Models\\ProjectCategoryGroup.cs",
               "ToolTip": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Models\\ProjectCategoryGroup.cs",
-              "RelativeToolTip": "..\\..\\..\\..\\..\\..\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Models\\ProjectCategoryGroup.cs",
+              "RelativeToolTip": "Models\\ProjectCategoryGroup.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAE8AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-07-06T04:51:43.877Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
+              "DocumentIndex": 16,
               "Title": "StringToVisibilityConverter.cs",
               "DocumentMoniker": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Converters\\StringToVisibilityConverter.cs",
-              "RelativeDocumentMoniker": "..\\..\\..\\..\\..\\..\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Converters\\StringToVisibilityConverter.cs",
+              "RelativeDocumentMoniker": "Converters\\StringToVisibilityConverter.cs",
               "ToolTip": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Converters\\StringToVisibilityConverter.cs",
-              "RelativeToolTip": "..\\..\\..\\..\\..\\..\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Converters\\StringToVisibilityConverter.cs",
+              "RelativeToolTip": "Converters\\StringToVisibilityConverter.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABoAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-07-06T04:23:03.125Z"
@@ -110,9 +112,9 @@
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "MainWindow.xaml",
-              "DocumentMoniker": "C:\\Users\\occho\\Desktop\\aaa\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Views\\MainWindow.xaml",
+              "DocumentMoniker": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Views\\MainWindow.xaml",
               "RelativeDocumentMoniker": "Views\\MainWindow.xaml",
-              "ToolTip": "C:\\Users\\occho\\Desktop\\aaa\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Views\\MainWindow.xaml",
+              "ToolTip": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Views\\MainWindow.xaml",
               "RelativeToolTip": "Views\\MainWindow.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
               "WhenOpened": "2025-07-06T03:41:33.141Z",
@@ -122,9 +124,9 @@
               "$type": "Document",
               "DocumentIndex": 7,
               "Title": "FileItemData.cs",
-              "DocumentMoniker": "C:\\Users\\occho\\Desktop\\aaa\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Models\\FileItemData.cs",
+              "DocumentMoniker": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Models\\FileItemData.cs",
               "RelativeDocumentMoniker": "Models\\FileItemData.cs",
-              "ToolTip": "C:\\Users\\occho\\Desktop\\aaa\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Models\\FileItemData.cs",
+              "ToolTip": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Models\\FileItemData.cs",
               "RelativeToolTip": "Models\\FileItemData.cs",
               "ViewState": "AgIAACMAAAAAAAAAAMBUwCcAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -134,9 +136,9 @@
               "$type": "Document",
               "DocumentIndex": 6,
               "Title": "ProjectData.cs",
-              "DocumentMoniker": "C:\\Users\\occho\\Desktop\\aaa\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Models\\ProjectData.cs",
+              "DocumentMoniker": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Models\\ProjectData.cs",
               "RelativeDocumentMoniker": "Models\\ProjectData.cs",
-              "ToolTip": "C:\\Users\\occho\\Desktop\\aaa\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Models\\ProjectData.cs",
+              "ToolTip": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Models\\ProjectData.cs",
               "RelativeToolTip": "Models\\ProjectData.cs",
               "ViewState": "AgIAANUAAAAAAAAAAEBYwNoAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -146,9 +148,9 @@
               "$type": "Document",
               "DocumentIndex": 4,
               "Title": "AssemblyInfo.cs",
-              "DocumentMoniker": "C:\\Users\\occho\\Desktop\\aaa\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\AssemblyInfo.cs",
+              "DocumentMoniker": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\AssemblyInfo.cs",
               "RelativeDocumentMoniker": "AssemblyInfo.cs",
-              "ToolTip": "C:\\Users\\occho\\Desktop\\aaa\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\AssemblyInfo.cs",
+              "ToolTip": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\AssemblyInfo.cs",
               "RelativeToolTip": "AssemblyInfo.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -158,9 +160,9 @@
               "$type": "Document",
               "DocumentIndex": 10,
               "Title": "PdfConversionService.cs",
-              "DocumentMoniker": "C:\\Users\\occho\\Desktop\\aaa\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Services\\PdfConversionService.cs",
+              "DocumentMoniker": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Services\\PdfConversionService.cs",
               "RelativeDocumentMoniker": "Services\\PdfConversionService.cs",
-              "ToolTip": "C:\\Users\\occho\\Desktop\\aaa\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Services\\PdfConversionService.cs",
+              "ToolTip": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Services\\PdfConversionService.cs",
               "RelativeToolTip": "Services\\PdfConversionService.cs",
               "ViewState": "AgIAAJoBAAAAAAAAAABVwJ8BAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -170,9 +172,9 @@
               "$type": "Document",
               "DocumentIndex": 2,
               "Title": "App.xaml",
-              "DocumentMoniker": "C:\\Users\\occho\\Desktop\\aaa\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\App.xaml",
+              "DocumentMoniker": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\App.xaml",
               "RelativeDocumentMoniker": "App.xaml",
-              "ToolTip": "C:\\Users\\occho\\Desktop\\aaa\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\App.xaml",
+              "ToolTip": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\App.xaml",
               "RelativeToolTip": "App.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
               "WhenOpened": "2025-07-05T08:47:47.674Z",
@@ -182,9 +184,9 @@
               "$type": "Document",
               "DocumentIndex": 8,
               "Title": "FileItem.cs",
-              "DocumentMoniker": "C:\\Users\\occho\\Desktop\\aaa\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Models\\FileItem.cs",
+              "DocumentMoniker": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Models\\FileItem.cs",
               "RelativeDocumentMoniker": "Models\\FileItem.cs",
-              "ToolTip": "C:\\Users\\occho\\Desktop\\aaa\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Models\\FileItem.cs",
+              "ToolTip": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Models\\FileItem.cs",
               "RelativeToolTip": "Models\\FileItem.cs",
               "ViewState": "AgIAAIUAAAAAAAAAAEBYwIoAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -194,9 +196,9 @@
               "$type": "Document",
               "DocumentIndex": 9,
               "Title": "ProjectManager.cs",
-              "DocumentMoniker": "C:\\Users\\occho\\Desktop\\aaa\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Services\\ProjectManager.cs",
+              "DocumentMoniker": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Services\\ProjectManager.cs",
               "RelativeDocumentMoniker": "Services\\ProjectManager.cs",
-              "ToolTip": "C:\\Users\\occho\\Desktop\\aaa\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Services\\ProjectManager.cs",
+              "ToolTip": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Services\\ProjectManager.cs",
               "RelativeToolTip": "Services\\ProjectManager.cs",
               "ViewState": "AgIAAHEAAAAAAAAAAEBYwHYAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -206,9 +208,9 @@
               "$type": "Document",
               "DocumentIndex": 11,
               "Title": "PdfMergeService.cs",
-              "DocumentMoniker": "C:\\Users\\occho\\Desktop\\aaa\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Services\\PdfMergeService.cs",
+              "DocumentMoniker": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Services\\PdfMergeService.cs",
               "RelativeDocumentMoniker": "Services\\PdfMergeService.cs",
-              "ToolTip": "C:\\Users\\occho\\Desktop\\aaa\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Services\\PdfMergeService.cs",
+              "ToolTip": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Services\\PdfMergeService.cs",
               "RelativeToolTip": "Services\\PdfMergeService.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAFEAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -218,9 +220,9 @@
               "$type": "Document",
               "DocumentIndex": 13,
               "Title": "MainWindow.xaml.cs",
-              "DocumentMoniker": "C:\\Users\\occho\\Desktop\\aaa\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\MainWindow.xaml.cs",
+              "DocumentMoniker": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\MainWindow.xaml.cs",
               "RelativeDocumentMoniker": "MainWindow.xaml.cs",
-              "ToolTip": "C:\\Users\\occho\\Desktop\\aaa\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\MainWindow.xaml.cs",
+              "ToolTip": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\MainWindow.xaml.cs",
               "RelativeToolTip": "MainWindow.xaml.cs",
               "ViewState": "AgIAAKQFAAAAAAAAAABVwKkFAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -230,9 +232,9 @@
               "$type": "Document",
               "DocumentIndex": 14,
               "Title": "ProjectEditDialog.xaml.cs",
-              "DocumentMoniker": "C:\\Users\\occho\\Desktop\\aaa\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Views\\ProjectEditDialog.xaml.cs",
+              "DocumentMoniker": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Views\\ProjectEditDialog.xaml.cs",
               "RelativeDocumentMoniker": "Views\\ProjectEditDialog.xaml.cs",
-              "ToolTip": "C:\\Users\\occho\\Desktop\\aaa\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Views\\ProjectEditDialog.xaml.cs",
+              "ToolTip": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Views\\ProjectEditDialog.xaml.cs",
               "RelativeToolTip": "Views\\ProjectEditDialog.xaml.cs",
               "ViewState": "AgIAALgCAAAAAAAAAABVwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -242,9 +244,9 @@
               "$type": "Document",
               "DocumentIndex": 15,
               "Title": "README.md",
-              "DocumentMoniker": "C:\\Users\\occho\\Desktop\\aaa\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\README.md",
+              "DocumentMoniker": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\README.md",
               "RelativeDocumentMoniker": "README.md",
-              "ToolTip": "C:\\Users\\occho\\Desktop\\aaa\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\README.md",
+              "ToolTip": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\README.md",
               "RelativeToolTip": "README.md",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAEsAAAAVAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
@@ -254,9 +256,9 @@
               "$type": "Document",
               "DocumentIndex": 1,
               "Title": "ProjectEditDialog.xaml",
-              "DocumentMoniker": "C:\\Users\\occho\\Desktop\\aaa\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Views\\ProjectEditDialog.xaml",
+              "DocumentMoniker": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Views\\ProjectEditDialog.xaml",
               "RelativeDocumentMoniker": "Views\\ProjectEditDialog.xaml",
-              "ToolTip": "C:\\Users\\occho\\Desktop\\aaa\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Views\\ProjectEditDialog.xaml",
+              "ToolTip": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Views\\ProjectEditDialog.xaml",
               "RelativeToolTip": "Views\\ProjectEditDialog.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
               "WhenOpened": "2025-07-06T03:05:47.887Z"
@@ -265,9 +267,9 @@
               "$type": "Document",
               "DocumentIndex": 12,
               "Title": "FileManagementService.cs",
-              "DocumentMoniker": "C:\\Users\\occho\\Desktop\\aaa\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Services\\FileManagementService.cs",
+              "DocumentMoniker": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Services\\FileManagementService.cs",
               "RelativeDocumentMoniker": "Services\\FileManagementService.cs",
-              "ToolTip": "C:\\Users\\occho\\Desktop\\aaa\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Services\\FileManagementService.cs",
+              "ToolTip": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\Services\\FileManagementService.cs",
               "RelativeToolTip": "Services\\FileManagementService.cs",
               "ViewState": "AgIAACcBAAAAAAAAAABVwCwBAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -277,9 +279,9 @@
               "$type": "Document",
               "DocumentIndex": 5,
               "Title": "AllAutoOfficePDF2.csproj",
-              "DocumentMoniker": "C:\\Users\\occho\\Desktop\\aaa\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\AllAutoOfficePDF2.csproj",
+              "DocumentMoniker": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\AllAutoOfficePDF2.csproj",
               "RelativeDocumentMoniker": "AllAutoOfficePDF2.csproj",
-              "ToolTip": "C:\\Users\\occho\\Desktop\\aaa\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\AllAutoOfficePDF2.csproj",
+              "ToolTip": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\AllAutoOfficePDF2.csproj",
               "RelativeToolTip": "AllAutoOfficePDF2.csproj",
               "ViewState": "AgIAABoAAAAAAAAAAAA8wAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
@@ -289,9 +291,9 @@
               "$type": "Document",
               "DocumentIndex": 3,
               "Title": "App.xaml.cs",
-              "DocumentMoniker": "C:\\Users\\occho\\Desktop\\aaa\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\App.xaml.cs",
+              "DocumentMoniker": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\App.xaml.cs",
               "RelativeDocumentMoniker": "App.xaml.cs",
-              "ToolTip": "C:\\Users\\occho\\Desktop\\aaa\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\App.xaml.cs",
+              "ToolTip": "C:\\github\\AllAutoOfficePDF2\\AllAutoOfficePDF2\\App.xaml.cs",
               "RelativeToolTip": "App.xaml.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAACUAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
